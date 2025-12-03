@@ -2,7 +2,7 @@ name: Flutter Build Android
 
 on:
   workflow_dispatch:
-
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,54 +12,35 @@ jobs:
       FLUTTER_HOME: $HOME/flutter
 
     steps:
-    # ------------------------------
-    # 1) Checkout Code
-    # ------------------------------
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    # ------------------------------
-    # 2) Cache Flutter SDK
-    # ------------------------------
     - name: Cache Flutter SDK
       id: flutter-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: $HOME/flutter
         key: flutter-sdk-cache-v1
 
-    # ------------------------------
-    # 3) Install Flutter (only if missing)
-    # ------------------------------
     - name: Install Flutter SDK
       if: steps.flutter-cache.outputs.cache-hit != 'true'
       run: |
         echo "Downloading Flutter SDK..."
         wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.4-stable.tar.xz -O flutter.tar.xz
         tar -xf flutter.tar.xz -C $HOME
-        echo "Flutter installed."
-    
-    # ------------------------------
-    # 4) Add Flutter to PATH
-    # ------------------------------
+
     - name: Add Flutter to PATH
       run: |
         echo "$HOME/flutter/bin" >> $GITHUB_PATH
         flutter --version
 
-    # ------------------------------
-    # 5) Cache Android SDK
-    # ------------------------------
     - name: Cache Android SDK
       id: android-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: $HOME/android-sdk
         key: android-sdk-cache-v1
 
-    # ------------------------------
-    # 6) Install Android SDK (only if missing)
-    # ------------------------------
     - name: Install Android SDK
       if: steps.android-cache.outputs.cache-hit != 'true'
       run: |
@@ -76,32 +57,23 @@ jobs:
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-34" "build-tools;34.0.0" "platform-tools"
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-    # ------------------------------
-    # 7) Add Android SDK to PATH
-    # ------------------------------
     - name: Add Android SDK to PATH
       run: |
         echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
         echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
         echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
 
-    # ------------------------------
-    # 8) Flutter Pub
-    # ------------------------------
     - name: Install dependencies
       run: flutter pub get
 
-    # ------------------------------
-    # 9) Build APK
-    # ------------------------------
     - name: Build APK
       run: flutter build apk --release
 
-    # ------------------------------
-    # 10) Upload Artifact
-    # ------------------------------
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
+    # ------------------------------------
+    # Updated: Upload-artifact v4
+    # ------------------------------------
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: app-release.apk
+        name: app-release
         path: build/app/outputs/flutter-apk/app-release.apk
