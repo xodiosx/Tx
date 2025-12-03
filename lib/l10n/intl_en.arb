@@ -110,5 +110,21 @@
   "updateRequest": "Please try to use the latest version. Visit the project address to check for the latest version.",
   "avncScreenResize": "Adaptive Screen Size",
   "avncResizeFactor": "Screen Scaling Ratio", 
-  "avncResizeFactorValue": "Current scaling is"
+  "avncResizeFactorValue": "Current scaling is",
+  "waitingGames": "gaming while Waiting",
+  "extrusionProcess": "Extrusion Process",
+  "gameTitleSnake": "Snake Game",
+  "gameTitleTetris": "Tetris",
+  "gameTitleFlappy": "Flappy Bird",
+  "score": "Score: {score}",
+  "gameOver": "Game Over! Tap to restart",
+  "startGame": "Tap to Start",
+  "pause": "Pause",
+  "resume": "Resume",
+"extractionCompleteExitGame": "Extraction complete! Exiting game mode.",
+  "mindTwisterGames": "Mind Twister Games", 
+  "extractionInProgress": "Playing - Extraction in progress...",
+  "playWhileWaiting": "Play while waiting for system processes",
+  "gameModeActive": "Game Mode Active",
+  "simulateExtractionComplete": "Simulate Extraction Complete"
 }
