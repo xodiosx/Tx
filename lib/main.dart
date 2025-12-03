@@ -1,13 +1,13 @@
-// main.dart  --  This file is part of tiny_computer.               
+// main.dart  --  This file is part of xodos.               
                                                                         
 // Copyright (C) 2023 Caten Hu                                          
                                                                         
-// Tiny Computer is free software: you can redistribute it and/or modify
+// xodos Computer is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published    
 // by the Free Software Foundation, either version 3 of the License,    
 // or any later version.                               
                                                                          
-// Tiny Computer is distributed in the hope that it will be useful,          
+// xodos Computer is distributed in the hope that it will be useful,          
 // but WITHOUT ANY WARRANTY; without even the implied warranty          
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.              
 // See the GNU General Public License for more details.                 
@@ -31,9 +31,9 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:xterm/xterm.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:tiny_computer/l10n/app_localizations.dart';
+import 'package:xodos/l10n/app_localizations.dart';
 
-import 'package:tiny_computer/workflow.dart';
+import 'package:xodos/workflow.dart';
 
 import 'package:avnc_flutter/avnc_flutter.dart';
 import 'package:x11_flutter/x11_flutter.dart';
@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
               colorScheme: darkDynamic,
               useMaterial3: true,
             ),
-            home: MyHomePage(title: "Tiny Computer"),
+            home: MyHomePage(title: "xodos Computer"),
           );
         }
     );
@@ -554,11 +554,11 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
           const SizedBox.square(dimension: 8),
           Wrap(alignment: WrapAlignment.center, spacing: 4.0, runSpacing: 4.0, children: [
             OutlinedButton(style: D.commandButtonStyle, child: Text("${AppLocalizations.of(context)!.installHangoverStable}（10.14）"), onPressed: () async {
-              Util.termWrite("bash ~/.local/share/tiny/extra/install-hangover-stable");
+              Util.termWrite("bash ~/.local/share/xodos/extra/install-hangover-stable");
               G.pageIndex.value = 0;
             }),
             OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.installHangoverLatest), onPressed: () async {
-              Util.termWrite("bash ~/.local/share/tiny/extra/install-hangover");
+              Util.termWrite("bash ~/.local/share/xodos/extra/install-hangover");
               G.pageIndex.value = 0;
             }),
             OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.uninstallHangover), onPressed: () async {
@@ -1060,7 +1060,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           Padding(padding: EdgeInsets.all(8), child: Text(AppLocalizations.of(context)!.recommendApp)),
           ElevatedButton(
             onPressed: () {
-              launchUrl(Uri.parse("https://github.com/Cateners/tiny_computer"), mode: LaunchMode.externalApplication);
+              launchUrl(Uri.parse("https://github.com/Cateners/xodos"), mode: LaunchMode.externalApplication);
             },
             child: Text(AppLocalizations.of(context)!.projectUrl),
           ),
