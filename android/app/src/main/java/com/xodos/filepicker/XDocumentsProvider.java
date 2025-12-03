@@ -1,4 +1,4 @@
-package com.com.xodos.filepicker;
+package com.xodos.filepicker;
 
 import android.annotation.TargetApi;
 import android.content.res.AssetFileDescriptor;

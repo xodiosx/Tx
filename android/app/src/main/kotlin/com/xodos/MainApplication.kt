@@ -1,4 +1,4 @@
-package com.com.xodos
+package com.xodos
 
 import android.content.Context
 import com.google.android.material.color.DynamicColors
