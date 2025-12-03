@@ -7,7 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.com.xodos.databinding.ActivitySignal9Binding
+import com.xodos.databinding.ActivitySignal9Binding
 
 class Signal9Activity : AppCompatActivity() {
 

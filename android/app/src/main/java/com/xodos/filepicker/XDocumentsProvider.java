@@ -13,7 +13,7 @@ import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.webkit.MimeTypeMap;
 
-import com.com.xodos.R;
+import com.xodos.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
