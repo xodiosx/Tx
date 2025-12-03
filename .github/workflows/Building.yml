@@ -139,9 +139,9 @@ jobs:
     # -------------------------
     - name: Build release APK
       run: |
-         rm -rf ./build
-         flutter clean
-         flutter pub get         
+        rm -rf ./build
+        flutter clean
+        flutter pub get         
         flutter build apk --target-platform android-arm64 --split-per-abi
 
     # -------------------------
