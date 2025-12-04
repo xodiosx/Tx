@@ -16,7 +16,7 @@ jobs:
      
     - name: Prepare SDK folders
       run: |
-        #mkdir -p $HOME/flutter
+        
         ls $HOME
      
      

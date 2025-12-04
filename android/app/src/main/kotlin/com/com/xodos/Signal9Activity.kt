@@ -1,4 +1,4 @@
-package com.xodos
+package com.com.xodos
 
 import android.content.Intent
 import android.net.Uri
@@ -7,7 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.xodos.databinding.ActivitySignal9Binding
+import com.com.xodos.databinding.ActivitySignal9Binding
 
 class Signal9Activity : AppCompatActivity() {
 

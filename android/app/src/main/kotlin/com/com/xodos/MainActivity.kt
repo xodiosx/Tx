@@ -1,4 +1,4 @@
-package com.xodos
+package com.com.xodos
 
 import android.system.Os.setenv
 
