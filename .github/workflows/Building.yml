@@ -27,7 +27,7 @@ jobs:
       id: cache-flutter
       uses: actions/cache@v3
       with:
-        path: $HOME/flutter
+        path: ~/flutter
         key: flutter-sdk-cache-v1
         restore-keys: |
              flutter-sdk-cache-
@@ -60,7 +60,7 @@ jobs:
       id: cache-android
       uses: actions/cache@v3
       with:
-        path: $HOME/android-sdk
+        path: ~/android-sdk
         key: android-sdk-cache-v1
         restore-keys: |
             android-sdk-cache-
