@@ -30,7 +30,7 @@ jobs:
         path: $HOME/flutter
         key: flutter-sdk-cache-v1
         restore-keys: |
-             flutter-sdk-cache-v1 | flutter-sdk-cache-
+             flutter-sdk-cache-
     - name: Download Flutter SDK if not cached
       if: steps.cache-flutter.outputs.cache-hit != 'true'
       run: |
@@ -63,7 +63,7 @@ jobs:
         path: $HOME/android-sdk
         key: android-sdk-cache-v1
         restore-keys: |
-            android-sdk-cache-v | android-sdk-cache-
+            android-sdk-cache-
 
 
     # -------------------------
