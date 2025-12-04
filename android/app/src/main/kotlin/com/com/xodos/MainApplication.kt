@@ -41,7 +41,7 @@ class MainApplication : Application() {
                 val outFile = File(dir, "app.log")
                 val writer = FileWriter(outFile, true)
 
-                val process = Runtime.getRuntime().exec(arrayOf("logcat", "|", "grep", "xodos"))
+                val process = Runtime.getRuntime().exec(arrayOf("logcat", "|", "grep -E", "'xodos|tiny'"))
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
 
                 var line: String?
