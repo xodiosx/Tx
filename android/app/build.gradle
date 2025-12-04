@@ -56,7 +56,7 @@ android {
         applicationId "com.xodos"
         // 
         // 
-        minSdk 25 // glob() version //proot version //ffmpeg_kit; flutter.minSdkVersion
+        minSdk 26 // glob() version //proot version //ffmpeg_kit; flutter.minSdkVersion
         targetSdk 34 //https://github.com/termux/termux-app/issues/1072; native; linker; flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
