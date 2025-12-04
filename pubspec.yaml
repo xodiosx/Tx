@@ -49,11 +49,14 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
-  x11_flutter:
-    path: ./x11_flutter
+x11_flutter:
+    git:
+      url: https://github.com/tiny-computer/x11_flutter.git
+      ref: 3b92b515b1ebc32c93e18e8b3a2983656713e4dd
   avnc_flutter:
-    path: ./avnc_flutter
-
+    git:
+      url: https://github.com/tiny-computer/avnc_flutter.git
+      ref: 4008565259f88fe4613b885979f79e439bc5a420
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
