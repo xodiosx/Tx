@@ -53,8 +53,6 @@ dependencies:
     path: ./x11_flutter
   avnc_flutter:
     path: ./avnc_flutter
-  x11_bridge:
-    path: ../x11_bridge
 
 
   # The following adds the Cupertino Icons font to your application.
