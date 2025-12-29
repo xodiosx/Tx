@@ -18,7 +18,7 @@ class MainApplication : Application() {
         DynamicColors.applyToActivitiesIfAvailable(this)
 
         // Start logcat capture
-        startLogcatCapture()
+     //   startLogcatCapture()
     }
 
     override fun attachBaseContext(base: Context?) {
@@ -41,7 +41,7 @@ class MainApplication : Application() {
                 val outFile = File(dir, "app.log")
                 val writer = FileWriter(outFile, true)
 
-                val process = Runtime.getRuntime().exec(arrayOf("logcat", "|", "grep", "xodos"))
+                val process = Runtime.getRuntime().exec(arrayOf("logcat", "|", "grep", "'xodos"))
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
 
                 var line: String?
