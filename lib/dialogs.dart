@@ -202,11 +202,11 @@ class _DxvkDialogState extends State<DxvkDialog> {
     String containerPath = "${G.dataPath}/usr/wincomponents/d3d/$fileName";
     
     if (fileName.endsWith('.zip')) {
-      Util.termWrite("unzip -o '$containerPath' -d ${G.dataPath}/home/.wine/drive_c/windows'");
+      Util.termWrite("unzip -o '$containerPath' -d '${G.dataPath}/home/.wine/drive_c/windows'");
     } else if (fileName.endsWith('.7z')) {
-      Util.termWrite("7z x '$containerPath' -o${G.dataPath}/home/.wine/drive_c/windows' -y");
+      Util.termWrite("7z x '$containerPath' -o'${G.dataPath}/home/.wine/drive_c/windows' -y");
     } else {
-      Util.termWrite("tar -xaf '$containerPath' -C ${G.dataPath}/home/.wine/drive_c/windows'");
+      Util.termWrite("tar -xaf '$containerPath' -C '${G.dataPath}/home/.wine/drive_c/windows'");
     }
     
     await Future.delayed(const Duration(milliseconds: 50));

@@ -2365,7 +2365,7 @@ class _WineSettingsDialogState extends State<WineSettingsDialog> {
     try {
       final result = await Process.run(
         '$prefix/bin/sh',
-        ['-c', 'pgrep -f "$wineBin"'],
+        ['-c', 'pgrep -f "start.exe"'],
       );
       setState(() {
         _wineRunning = result.exitCode == 0;
@@ -2396,8 +2396,6 @@ export WINEPREFIX=\$HOME/.wine
 export WINEDEBUG=-all
 export BOX64_NOBANNER=1
 
-# start termux-x11 if not running
-pgrep -f termux.x11 >/dev/null || termux-x11 :4 &
 
 # run wine
 xodxx
@@ -2436,7 +2434,7 @@ xodxx
     try {
       await Process.run(
         '$prefix/bin/sh',
-        ['-c', 'pkill -f "$wineBin"'],
+        ['-c', 'pkill -f "wine"'],
       );
 
       await Future.delayed(const Duration(seconds: 1));
