@@ -140,9 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// ... then continue with all the other classes from the original file:
-
-// Setting Page
+//
 // Setting Page
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -713,112 +711,196 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
         ),
 
         // Panel 3: Graphics Acceleration
-        ExpansionPanel(
-          isExpanded: _expandState[3],
-          headerBuilder: (context, isExpanded) {
-            return ListTile(
-              title: Text(AppLocalizations.of(context)!.graphicsAcceleration),
-              subtitle: Text(AppLocalizations.of(context)!.experimentalFeature),
-            );
-          },
-          body: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(children: [
-              Text(AppLocalizations.of(context)!.graphicsAccelerationHint),
-              const SizedBox.square(dimension: 16),
-              TextFormField(
-                maxLines: null,
-                initialValue: Util.getGlobal("defaultVirglCommand") as String,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.virglServerParams,
-                ),
-                onChanged: (value) async {
-                  await G.prefs.setString("defaultVirglCommand", value);
-                },
-              ),
-              const SizedBox.square(dimension: 8),
-              TextFormField(
-                maxLines: null,
-                initialValue: Util.getGlobal("defaultVirglOpt") as String,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.virglEnvVar,
-                ),
-                onChanged: (value) async {
-                  await G.prefs.setString("defaultVirglOpt", value);
-                },
-              ),
-              const SizedBox.square(dimension: 8),
-              SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.enableVirgl),
-                subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
-                value: Util.getGlobal("virgl") as bool,
-                onChanged: (value) {
-                  if (value) {
-    // If enabling virgl, disable turnip
-    G.prefs.setBool("turnip", false);
-    // Also disable DRI3 if it was enabled (since it requires turnip)
-    if (Util.getGlobal("dri3")) {
-      G.prefs.setBool("dri3", false);
-    }
-  }
-                  G.prefs.setBool("virgl", value);
-                  setState(() {});
-                },
-              ),
-              const SizedBox.square(dimension: 16),
-              const Divider(height: 2, indent: 8, endIndent: 8),
-              const SizedBox.square(dimension: 16),
-              Text(AppLocalizations.of(context)!.turnipAdvantages),
-              const SizedBox.square(dimension: 8),
-              TextFormField(
-                maxLines: null,
-                initialValue: Util.getGlobal("defaultTurnipOpt") as String,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.turnipEnvVar,
-                ),
-                onChanged: (value) async {
-                  await G.prefs.setString("defaultTurnipOpt", value);
-                },
-              ),
-              const SizedBox.square(dimension: 8),
-              SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.enableTurnipZink),
-                subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
-                value: Util.getGlobal("turnip") as bool,
-                onChanged: (value) async {
-                G.prefs.setBool("virgl", false);
-                  G.prefs.setBool("turnip", value);
-                  if (!value && Util.getGlobal("dri3")) {
-                    G.prefs.setBool("dri3", false);
-                  }
-                  setState(() {});
-                },
-              ),
-              const SizedBox.square(dimension: 8),
-              SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.enableDRI3),
-                subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
-                value: Util.getGlobal("dri3") as bool,
-                onChanged: (value) async {
-                  if (value && !(Util.getGlobal("turnip") && Util.getGlobal("useX11"))) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.dri3Requirement)),
-                    );
-                    return;
-                  }
-                  G.prefs.setBool("dri3", value);
-                  setState(() {});
-                },
-              ),
-              const SizedBox.square(dimension: 16),
-            ]),
-          ),
+// Panel 3: Graphics Acceleration
+ExpansionPanel(
+  isExpanded: _expandState[3],
+  headerBuilder: (context, isExpanded) {
+    return ListTile(
+      title: Text(AppLocalizations.of(context)!.graphicsAcceleration),
+      subtitle: Text(AppLocalizations.of(context)!.experimentalFeature),
+    );
+  },
+  body: Padding(
+    padding: const EdgeInsets.all(12),
+    child: Column(children: [
+      Text(AppLocalizations.of(context)!.graphicsAccelerationHint),
+      const SizedBox.square(dimension: 16),
+      
+      // Virgl section
+      Text(AppLocalizations.of(context)!.virglServerParams,
+          style: TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox.square(dimension: 8),
+      TextFormField(
+        maxLines: null,
+        initialValue: Util.getGlobal("defaultVirglCommand") as String,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: AppLocalizations.of(context)!.virglServerParams,
         ),
+        onChanged: (value) async {
+          await G.prefs.setString("defaultVirglCommand", value);
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      TextFormField(
+        maxLines: null,
+        initialValue: Util.getGlobal("defaultVirglOpt") as String,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: AppLocalizations.of(context)!.virglEnvVar,
+        ),
+        onChanged: (value) async {
+          await G.prefs.setString("defaultVirglOpt", value);
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      SwitchListTile(
+        title: Text(AppLocalizations.of(context)!.enableVirgl),
+        subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
+        value: Util.getGlobal("virgl") as bool,
+        onChanged: (value) {
+          if (value) {
+            // If enabling virgl, disable venus and turnip
+            G.prefs.setBool("venus", false);
+            G.prefs.setBool("turnip", false);
+            // Also disable DRI3 if it was enabled
+            if (Util.getGlobal("dri3")) {
+              G.prefs.setBool("dri3", false);
+            }
+          }
+          G.prefs.setBool("virgl", value);
+          setState(() {});
+        },
+      ),
+      
+      const SizedBox.square(dimension: 16),
+      const Divider(height: 2, indent: 8, endIndent: 8),
+      const SizedBox.square(dimension: 16),
+      
+      // Venus section
+      Text(AppLocalizations.of(context)!.venusAdvantages,
+          style: TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox.square(dimension: 8),
+      Text(AppLocalizations.of(context)!.venusAdvantages),
+      const SizedBox.square(dimension: 8),
+      TextFormField(
+        maxLines: null,
+        initialValue: Util.getGlobal("defaultVenusCommand") as String,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: AppLocalizations.of(context)!.venusServerParams,
+        ),
+        onChanged: (value) async {
+          await G.prefs.setString("defaultVenusCommand", value);
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      TextFormField(
+        maxLines: null,
+        initialValue: Util.getGlobal("defaultVenusOpt") as String,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: AppLocalizations.of(context)!.venusEnvVar,
+        ),
+        onChanged: (value) async {
+          await G.prefs.setString("defaultVenusOpt", value);
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      SwitchListTile(
+        title: Text(AppLocalizations.of(context)!.enableVenus),
+        subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
+        value: Util.getGlobal("venus") as bool,
+        onChanged: (value) {
+          if (value) {
+            // If enabling venus, disable virgl and turnip
+            G.prefs.setBool("virgl", false);
+            G.prefs.setBool("turnip", false);
+
+          }
+          G.prefs.setBool("venus", value);
+          
+          if (!value && Util.getGlobal("dri3")) {
+            G.prefs.setBool("dri3", false);
+          }
+          setState(() {});
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      SwitchListTile(
+        title: Text(AppLocalizations.of(context)!.enableAndroidVenus),
+        subtitle: Text(AppLocalizations.of(context)!.venusAdvantages),
+        value: Util.getGlobal("androidVenus") as bool,
+        onChanged: (value) async {
+          await G.prefs.setBool("androidVenus", value);
+          setState(() {});
+        },
+      ),
+      
+      const SizedBox.square(dimension: 16),
+      const Divider(height: 2, indent: 8, endIndent: 8),
+      const SizedBox.square(dimension: 16),
+      
+      // Turnip section
+      Text(AppLocalizations.of(context)!.turnipAdvantages,
+          style: TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox.square(dimension: 8),
+      TextFormField(
+        maxLines: null,
+        initialValue: Util.getGlobal("defaultTurnipOpt") as String,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: AppLocalizations.of(context)!.turnipEnvVar,
+        ),
+        onChanged: (value) async {
+          await G.prefs.setString("defaultTurnipOpt", value);
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      SwitchListTile(
+        title: Text(AppLocalizations.of(context)!.enableTurnipZink),
+        subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
+        value: Util.getGlobal("turnip") as bool,
+        onChanged: (value) async {
+          if (value) {
+            // If enabling turnip, disable virgl and venus
+            G.prefs.setBool("virgl", false);
+            G.prefs.setBool("venus", false);
+          }
+          G.prefs.setBool("turnip", value);
+          if (!value && Util.getGlobal("dri3")) {
+            G.prefs.setBool("dri3", false);
+          }
+          setState(() {});
+        },
+      ),
+      const SizedBox.square(dimension: 8),
+      SwitchListTile(
+        title: Text(AppLocalizations.of(context)!.enableDRI3),
+        subtitle: Text(AppLocalizations.of(context)!.applyOnNextLaunch),
+        value: Util.getGlobal("dri3") as bool,
+        onChanged: (value) async {
+        final bool useX11 = Util.getGlobal("useX11") == true;
+  final bool turnip = Util.getGlobal("turnip") == true;
+  final bool venus  = Util.getGlobal("venus") == true;
+           if (value && !(useX11 && (turnip || venus))) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context)!.dri3Requirement)),
+            );
+            return;
+          }
+          G.prefs.setBool("dri3", value);
+          setState(() {});
+        },
+      ),
+      const SizedBox.square(dimension: 16),
+    ]),
+  ),
+),
+
+
 
         // Panel 4: Windows App Support (with backup/restore button added)
         ExpansionPanel(
@@ -878,8 +960,21 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
                       );
                     },
                   ),
-                ],
-              ),
+                  
+                  
+OutlinedButton(
+            style: D.commandButtonStyle,
+            child: Text('Wine Settings'),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => WineSettingsDialog(),
+              );
+            },
+          ),
+        ],
+      ),
+              
               const SizedBox.square(dimension: 16),
               const Divider(height: 2, indent: 8, endIndent: 8),
               const SizedBox.square(dimension: 16),
@@ -1072,6 +1167,9 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
             ]),
           ),
         ),
+
+
+
 
         // Panel 5: System Backup & Restore (New panel)
         ExpansionPanel(
@@ -1529,6 +1627,10 @@ class _TerminalPageState extends State<TerminalPage> {
 
   void _forceExitContainer() {
     Util.termWrite('stopvnc');
+    Util.termWrite('pkill -f dbus');
+    Util.termWrite('pkill -f wine');
+    Util.termWrite('pkill -f virgl*');
+    Util.termWrite('pkill -f lxqt');
     Util.termWrite('exit');
     Util.termWrite('exit');
     
@@ -1735,6 +1837,19 @@ Future<void> _pasteToTerminal() async {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Fast Commands
 class FastCommands extends StatefulWidget {
@@ -2213,4 +2328,198 @@ Widget _buildTermuxKey(String label, {bool isActive = false, VoidCallback? onTap
       ),
     ),
   );
+}
+
+// ============================================
+// WINE SETTINGS DIALOG
+// ============================================
+
+
+
+class WineSettingsDialog extends StatefulWidget {
+  const WineSettingsDialog({super.key});
+
+  @override
+  State<WineSettingsDialog> createState() => _WineSettingsDialogState();
+}
+
+class _WineSettingsDialogState extends State<WineSettingsDialog> {
+  // ===== FIXED BIONIC PATHS =====
+  final String prefix = '/data/data/com.xodos/files/usr';
+  final String home = '/data/data/com.xodos/files/home';
+  final String wineBin =
+      '/data/data/com.xodos/files/usr/opt/wine/bin/wine';
+
+  bool _wineRunning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkWineProcess();
+  }
+
+  // ==============================
+  // CHECK WINE PROCESS
+  // ==============================
+  Future<void> _checkWineProcess() async {
+    try {
+      final result = await Process.run(
+        '$prefix/bin/sh',
+        ['-c', 'pgrep -f "$wineBin"'],
+      );
+      setState(() {
+        _wineRunning = result.exitCode == 0;
+      });
+    } catch (_) {
+      setState(() {
+        _wineRunning = false;
+      });
+    }
+  }
+
+  // ==============================
+  // START WINE (BIONIC)
+  // ==============================
+  Future<void> _startWine() async {
+    try {
+      await Process.start(
+        '$prefix/bin/sh',
+        [
+          '-c',
+          '''
+export PREFIX=$prefix
+export HOME=$home
+export PATH=\$PREFIX/bin
+export LD_LIBRARY_PATH=\$PREFIX/lib
+export DISPLAY=:4
+export WINEPREFIX=\$HOME/.wine
+export WINEDEBUG=-all
+export BOX64_NOBANNER=1
+
+# start termux-x11 if not running
+pgrep -f termux.x11 >/dev/null || termux-x11 :4 &
+
+# run wine
+xodxx
+'''
+        ],
+        mode: ProcessStartMode.detached,
+      );
+
+      await Future.delayed(const Duration(seconds: 2));
+      await _checkWineProcess();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Wine started (Bionic)'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start Wine: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // ==============================
+  // STOP WINE
+  // ==============================
+  Future<void> _stopWine() async {
+    try {
+      await Process.run(
+        '$prefix/bin/sh',
+        ['-c', 'pkill -f "$wineBin"'],
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+      await _checkWineProcess();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Wine stopped'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (_) {}
+  }
+
+  // ==============================
+  // UI
+  // ==============================
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: const [
+          Icon(Icons.wine_bar, color: Colors.deepPurple),
+          SizedBox(width: 8),
+          Text('Wine (Bionic)'),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Card(
+            color: _wineRunning ? Colors.green[50] : Colors.red[50],
+            child: ListTile(
+              leading: Icon(
+                _wineRunning ? Icons.check_circle : Icons.cancel,
+                color: _wineRunning ? Colors.green : Colors.red,
+              ),
+              title: const Text('Wine Status'),
+              subtitle:
+                  Text(_wineRunning ? 'Running' : 'Not Running'),
+              trailing: IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _checkWineProcess,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.play_arrow),
+            label: const Text('Start Wine Explorer'),
+            onPressed: _wineRunning ? null : _startWine,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.stop),
+            label: const Text('Stop Wine'),
+            onPressed: _wineRunning ? _stopWine : null,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Wine Bionic (native Android)\n'
+            '•⚠️change different drivers if not working⚠️\n'
+            '• Uses box64\n'
+            '• Use Termux X11 for better experience',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
 }
