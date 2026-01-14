@@ -2380,9 +2380,33 @@ class _WineSettingsDialogState extends State<WineSettingsDialog> {
   // ==============================
   // START WINE (BIONIC)
   // ==============================
+static Future<void> swine() async {
+    G.swinePty?.kill();
+    G.swinePty = Pty.start(
+      "/system/bin/sh"
+    );
+    G.swinePty!.write(const Utf8Encoder().convert("""
+export DATA_DIR=/data/data/com.xodos/files/
+export PATH=\$DATA_DIR/bin:\$PATH:\$DATA_DIR/usr/bin
+export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib
+export PREFIX=\$DATA_DIR/usr
+export HOME=\$DATA_DIR/home
+export TMPDIR=\$DATA_DIR/usr/tmp
+mkdir -p \$HOME
+mkdir -p \$TMPDIR
+export PATH=\$DATA_DIR/bin:\$PATH
+export LD_LIBRARY_PATH=\$DATA_DIR/lib
+TMPDIR=\$TMPDIR HOME=\$DATA_DIR/home XDG_CONFIG_HOME=\$TMPDIR LD_LIBRARY_PATH=\$DATA_DIR/bin:\$LD_LIBRARY_PATH \$DATA_DIR/bin/pulseaudio -F \$DATA_DIR/bin/pulseaudio.conf.tmp
+xodxx
+#exit
+"""));
+  await G.swinePty?.exitCode;
+  }
+
+
   Future<void> _startWine() async {
     try {
-      await Process.start(
+    /*  await Process.start(
         '$prefix/bin/sh',
         [
           '-c',
@@ -2403,8 +2427,9 @@ xodxx
         ],
         mode: ProcessStartMode.detached,
       );
-
-      await Future.delayed(const Duration(seconds: 2));
+*/
+swine();
+      await Future.delayed(const Duration(seconds: 3));
       await _checkWineProcess();
 
       if (mounted) {
