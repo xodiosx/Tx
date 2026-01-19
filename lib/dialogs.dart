@@ -590,7 +590,15 @@ class _EnvironmentDialogState extends State<EnvironmentDialog> {
   String _selectedKnownVariable = '';
   final List<String> _knownWineVariables = [
     'WINEARCH',
+     'DXVK_ASYNC',
+     'adrenotool',
+     'GALLIUM_DRIVER',
+   'MESA_LOADER_DRIVER_OVERRIDE',
+    'VK_LOADER_DEBUG',
+   'LD_DEBUG',
+    'ZINK_DEBUG',
     'WINEDEBUG',
+     'MESA_VK_WSI_PRESENT_MODE',
     'WINEPREFIX',
     'WINEESYNC',
     'WINEFSYNC',
@@ -607,7 +615,7 @@ class _EnvironmentDialogState extends State<EnvironmentDialog> {
   bool _debugEnabled = false;
   String _winedebugValue = '-all';
   final List<String> _winedebugOptions = [
-    '-all', 'err', 'warn', 'fixme', 'all', 'trace', 'message', 'heap', 'fps'
+    '-all', 'err', 'warn', 'fixme', 'all', 'trace', 'message', 'heap', 'fps', 'dx9', 'dx8'
   ];
   
   String _newVarName = '';
@@ -1306,6 +1314,8 @@ class _EnvironmentDialogState extends State<EnvironmentDialog> {
 
 
 // GPU Drivers Dialog
+
+
 class GpuDriversDialog extends StatefulWidget {
   @override
   _GpuDriversDialogState createState() => _GpuDriversDialogState();
@@ -1352,57 +1362,55 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
     await _updateVenusServerStatus();
   }
 
-  
-      
-      Future<void> _updateVirglServerStatus() async {
-  try {
-    final result = await Process.run(
-      '${G.dataPath}/usr/bin/sh',
-      [
-        '-c',
-        '${G.dataPath}/usr/bin/pgrep -a virgl_ |'
-        ' grep use-'
-      ],
-    );
+  Future<void> _updateVirglServerStatus() async {
+    try {
+      final result = await Process.run(
+        '${G.dataPath}/usr/bin/sh',
+        [
+          '-c',
+          '${G.dataPath}/usr/bin/pgrep -a virgl_ |'
+          ' grep use-'
+        ],
+      );
 
-    final output = result.stdout.toString().trim();
-    print('VirGL check output: "$output"');
+      final output = result.stdout.toString().trim();
+      print('VirGL check output: "$output"');
 
-    setState(() {
-      _virglServerRunning = output.isNotEmpty;
-    });
-  } catch (e) {
-    print('Error checking VirGL server status: $e');
-    setState(() {
-      _virglServerRunning = false;
-    });
+      setState(() {
+        _virglServerRunning = output.isNotEmpty;
+      });
+    } catch (e) {
+      print('Error checking VirGL server status: $e');
+      setState(() {
+        _virglServerRunning = false;
+      });
+    }
   }
-}
 
   Future<void> _updateVenusServerStatus() async {
-  try {
-    final result = await Process.run(
-      '${G.dataPath}/usr/bin/sh',
-      [
-        '-c',
-        '${G.dataPath}/usr/bin/pgrep -a virgl_ |'
-        ' grep venus'
-      ],
-    );
+    try {
+      final result = await Process.run(
+        '${G.dataPath}/usr/bin/sh',
+        [
+          '-c',
+          '${G.dataPath}/usr/bin/pgrep -a virgl_ |'
+          ' grep venus'
+        ],
+      );
 
-    final output = result.stdout.toString().trim();
-    print('Venus check output: "$output"');
+      final output = result.stdout.toString().trim();
+      print('Venus check output: "$output"');
 
-    setState(() {
-      _venusServerRunning = output.isNotEmpty;
-    });
-  } catch (e) {
-    print('Error checking Venus server status: $e');
-    setState(() {
-      _venusServerRunning = false;
-    });
+      setState(() {
+        _venusServerRunning = output.isNotEmpty;
+      });
+    } catch (e) {
+      print('Error checking Venus server status: $e');
+      setState(() {
+        _venusServerRunning = false;
+      });
+    }
   }
-}
 
   Future<void> _loadSavedSettings() async {
     try {
@@ -1467,9 +1475,9 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
       G.pageIndex.value = 0;
       await Future.delayed(const Duration(milliseconds: 300));
       
-      if (_selectedDriverType == 'turnip') {
-        await _applyGpuSettings();
-      } else if (_selectedDriverType == 'wrapper' && _selectedDriverFile != null) {
+      // Handle both turnip and wrapper driver extraction
+      if ((_selectedDriverType == 'turnip' || _selectedDriverType == 'wrapper') && 
+          _selectedDriverFile != null) {
         await _extractDriver();
       } else {
         await _applyGpuSettings();
@@ -1632,7 +1640,10 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
     Util.termWrite("echo 'Starting Venus server...'");
     await Future.delayed(const Duration(milliseconds: 50));
     
-    Util.termWrite("mkdir -p ${G.dataPath}/usr/tmp/.virgl_test");
+    Util.termWrite("mkdir -p ${G.dataPath}/usr/tmp/");
+    await Future.delayed(const Duration(milliseconds: 50));
+    
+    Util.termWrite("rm -rf ${G.dataPath}/usr/tmp/.virgl_test");
     await Future.delayed(const Duration(milliseconds: 50));
     
     String containerDir = "${G.dataPath}/containers/${G.currentContainer}";
@@ -1642,13 +1653,19 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
     Util.termWrite("echo 'Container directory: $containerDir'");
     await Future.delayed(const Duration(milliseconds: 50));
     
+    Util.termWrite("echo 'export VK_ICD_FILENAMES=${G.dataPath}/usr/share/vulkan/icd.d/wrapper_icd.aarch64.json' >> ${G.dataPath}/usr/opt/drv");
+    await Future.delayed(const Duration(milliseconds: 50));
+
     String androidVenusEnv = _androidVenusEnabled ? "ANDROID_VENUS=1 " : "";
-    String ldPreload = "/system/lib64/libvulkan.so";
+    String ldPreload = "LD_PRELOAD=/system/lib64/libvulkan.so";
  
     Util.termWrite(". /data/data/com.xodos/files/usr/opt/drv");    
     await Future.delayed(const Duration(milliseconds: 50));
     
-    Util.termWrite("$androidVenusEnv LD_PRELOAD=$ldPreload ${G.dataPath}/usr/bin/virgl_test_server $processedCommand &");    
+    Util.termWrite("$androidVenusEnv ${G.dataPath}/usr/bin/virgl_test_server $processedCommand &");    
+    await Future.delayed(const Duration(milliseconds: 50));
+    
+    Util.termWrite("echo 'export VK_ICD_FILENAMES=${G.dataPath}/usr/share/vulkan/icd.d/virtio_icd.aarch64.json' >> ${G.dataPath}/usr/opt/drv");
     await Future.delayed(const Duration(milliseconds: 50));
     
     Util.termWrite("export VN_DEBUG=vtest");  
@@ -1690,8 +1707,9 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
       Util.termWrite("mkdir -p ${G.dataPath}/usr/share/vulkan/icd.d");
       await Future.delayed(const Duration(milliseconds: 50));
       
-      String containerPath = "${G.dataPath}/usr/drivers/ter/$_selectedDriverFile";
+      String containerPath = "${G.dataPath}/usr/drivers/files/$_selectedDriverFile";
       
+      // Extract based on file extension
       if (_selectedDriverFile!.endsWith('.zip')) {
         Util.termWrite("unzip -o '$containerPath' -d '${G.dataPath}/usr'");
       } else if (_selectedDriverFile!.endsWith('.7z')) {
@@ -1700,11 +1718,22 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
         Util.termWrite("tar -xzf '$containerPath' -C '${G.dataPath}/usr'");
       } else if (_selectedDriverFile!.endsWith('.tar.xz') || _selectedDriverFile!.endsWith('.txz')) {
         Util.termWrite("tar -xJf '$containerPath' -C '${G.dataPath}/usr'");
+      } else if (_selectedDriverFile!.endsWith('.json')) {
+        // For JSON files (like turnip ICD files), copy to icd.d directory
+        Util.termWrite("cp '$containerPath' '${G.dataPath}/usr/share/vulkan/icd.d/'");
       } else {
         Util.termWrite("tar -xf '$containerPath' -C '${G.dataPath}/usr'");
       }
       
       await Future.delayed(const Duration(milliseconds: 50));
+      
+      // Special handling for turnip drivers
+      if (_selectedDriverType == 'turnip' && _selectedDriverFile!.endsWith('.json')) {
+        // Rename the turnip JSON file to the standard freedreno name
+        Util.termWrite("mv '${G.dataPath}/usr/share/vulkan/icd.d/$_selectedDriverFile' "
+                      "'${G.dataPath}/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json'");
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
       
       await _applyGpuSettings();
       
@@ -1721,7 +1750,7 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
 
   Future<void> _loadDriverFiles() async {
     try {
-      String hostDir = "${G.dataPath}/usr/drivers/ter";
+      String hostDir = "${G.dataPath}/usr/drivers/files";
       
       final dir = Directory(hostDir);
       if (!await dir.exists()) {
@@ -1769,7 +1798,10 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
     List<String> filteredFiles = [];
     
     if (_selectedDriverType == 'turnip') {
-      filteredFiles = [];
+      filteredFiles = _driverFiles.where((file) => 
+          file.toLowerCase().contains('turnip') ||
+          file.toLowerCase().contains('freedreno') ||
+          file.endsWith('.json')).toList();
     } else if (_selectedDriverType == 'wrapper') {
       filteredFiles = _driverFiles.where((file) => 
           file.toLowerCase().contains('wrapper')).toList();
@@ -1996,14 +2028,15 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
                 ),
               
               const SizedBox(height: 16),
-                          
+              
+              // Add driver file selection for both turnip and wrapper
+              if (_selectedDriverType == 'wrapper' || _selectedDriverType == 'turnip')
+                _buildDriverFileSelection(),
+              
               if (_selectedDriverType == 'turnip') _buildTurnipSettings(),
               if (_selectedDriverType == 'virgl') _buildVirglSettings(),
               if (_selectedDriverType == 'venus') _buildVenusSettings(),
               if (_selectedDriverType == 'wrapper') _buildWrapperSettings(),
-              
-              if (_selectedDriverType == 'wrapper')
-                _buildDriverFileSelection(),
               
               if (_selectedDriverType == 'turnip')
                 Card(
@@ -2081,29 +2114,54 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.blue, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Using built-in Turnip from: ${G.dataPath}/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue,
+            if (_selectedDriverFile == null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Using built-in Turnip from: ${G.dataPath}/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            if (_selectedDriverFile != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Using custom Turnip driver: $_selectedDriverFile',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 8),
             TextFormField(
               maxLines: 2,
@@ -2251,8 +2309,16 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
   }
 
   Widget _buildDriverFileSelection() {
-    List<String> filteredFiles = _driverFiles.where((file) => 
-        file.toLowerCase().contains('wrapper')).toList();
+    List<String> filteredFiles = _driverFiles.where((file) {
+      if (_selectedDriverType == 'turnip') {
+        return file.toLowerCase().contains('turnip') ||
+               file.toLowerCase().contains('freedreno') ||
+               file.endsWith('.json');
+      } else if (_selectedDriverType == 'wrapper') {
+        return file.toLowerCase().contains('wrapper');
+      }
+      return false;
+    }).toList();
     
     return Card(
       child: Padding(
@@ -2260,9 +2326,11 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Select Wrapper Driver File',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              _selectedDriverType == 'turnip' 
+                ? 'Select Turnip Driver File'
+                : 'Select Wrapper Driver File',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             
@@ -2270,19 +2338,29 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
               const Center(child: CircularProgressIndicator()),
             
             if (!_isLoading && filteredFiles.isEmpty)
-              const Column(
+              Column(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.orange, size: 48),
-                  SizedBox(height: 8),
+                  const Icon(Icons.error_outline, color: Colors.orange, size: 48),
+                  const SizedBox(height: 8),
                   Text(
-                    'No wrapper driver files found',
+                    _selectedDriverType == 'turnip'
+                      ? 'No turnip driver files found'
+                      : 'No wrapper driver files found',
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Please place wrapper driver files in the drivers folder',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    _selectedDriverType == 'turnip'
+                      ? 'Please place turnip driver files in the drivers folder'
+                      : 'Please place wrapper driver files in the drivers folder',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Refresh'),
+                    onPressed: _loadDriverFiles,
                   ),
                 ],
               ),
@@ -2290,9 +2368,11 @@ class _GpuDriversDialogState extends State<GpuDriversDialog> {
             if (!_isLoading && filteredFiles.isNotEmpty)
               DropdownButtonFormField<String>(
                 value: _selectedDriverFile,
-                decoration: const InputDecoration(
-                  labelText: 'Wrapper Driver File',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: _selectedDriverType == 'turnip'
+                    ? 'Turnip Driver File'
+                    : 'Wrapper Driver File',
+                  border: const OutlineInputBorder(),
                 ),
                 items: filteredFiles.map((String value) {
                   return DropdownMenuItem<String>(

@@ -404,11 +404,11 @@ class Workflow {
     "assets/assets.zip",
     "${G.dataPath}/assets.zip",
     );
-    // patch.tar.gz contains the xodos folder
-    // These are some patches that will be mounted to ~/.local/share/tiny
+    // patch.tar.xz contains the xodos folder with bionic rootfs
+    // These are some binaries to support wine bionic and patches that will be mounted to ~/.local/share/tiny
     await Util.copyAsset(
-    "assets/patch.tar.gz",
-    "${G.dataPath}/patch.tar.gz",
+    "assets/patch.tar.xz",
+    "${G.dataPath}/patch.tar.xz",
     );
   /*  await Util.copyAsset(
     "assets/native.tar.xz",
@@ -426,7 +426,7 @@ ln -sf ../applib/libexec_busybox.so \$DATA_DIR/bin/xz
 ln -sf ../applib/libexec_busybox.so \$DATA_DIR/bin/gzip
 ln -sf ../applib/libexec_proot.so \$DATA_DIR/bin/proot
 ln -sf ../applib/libexec_tar.so \$DATA_DIR/bin/tar
-#ln -sf ../applib/libexec_virgl_test_server.so \$DATA_DIR/bin/virgl_test_server
+ln -sf ../applib/libexec_virgl_test_server.so \$DATA_DIR/bin/virgl_test_servero
 ln -sf ../applib/libexec_getifaddrs_bridge_server.so \$DATA_DIR/bin/getifaddrs_bridge_server
 ln -sf ../applib/libexec_pulseaudio.so \$DATA_DIR/bin/pulseaudio
 ln -sf ../applib/libbusybox.so \$DATA_DIR/lib/libbusybox.so.1.37.0
@@ -440,8 +440,8 @@ ln -sf ../applib/libproot-loader.so \$DATA_DIR/lib/loader
 #\$DATA_DIR/bin/busybox tar -xf native.tar.xz -C /data/data/com.xodos/files/ --preserve-permissions
 chmod -R +x libexec/proot/*
 chmod 1777 tmp
-\$DATA_DIR/bin/tar zxf patch.tar.gz
-\$DATA_DIR/bin/busybox rm -rf assets.zip patch.tar.gz
+\$DATA_DIR/bin/tar x -J --delay-directory-restore --preserve-permissions -v -f patch.tar.xz
+\$DATA_DIR/bin/busybox rm -rf assets.zip patch.tar.xz
 """);
   }
 
@@ -456,7 +456,7 @@ chmod 1777 tmp
     Util.createDirFromString("${G.dataPath}/containers/0/.l2s");
     // This is the container rootfs, split into xa* by split command, placed in assets
     // On first startup, use this, don't let the user choose another one
-
+/*
     // Load custom manifest for container files
     final manifestString = await rootBundle.loadString('assets/container_manifest.json');
     final Map<String, dynamic> manifest = json.decode(manifestString);
@@ -468,6 +468,14 @@ chmod 1777 tmp
       final fileName = assetPath.split('/').last;
       await Util.copyAsset(assetPath, "${G.dataPath}/$fileName");
     }
+*/
+
+// Copy single container tarball instead of split xa files
+await Util.copyAsset(
+  "assets/container.tar.xz",
+  "${G.dataPath}/xodos.tar.xz",
+);
+
 
     G.updateText.value = AppLocalizations.of(G.homePageStateContext)!.installingContainerSystem;
     await Util.execute(
@@ -483,7 +491,9 @@ export PROOT_TMP_DIR=\$DATA_DIR/proot_tmp
 export PROOT_LOADER=\$DATA_DIR/applib/libproot-loader.so
 export PROOT_LOADER_32=\$DATA_DIR/applib/libproot-loader32.so
 #export PROOT_L2S_DIR=\$CONTAINER_DIR/.l2s
-\$DATA_DIR/bin/proot --link2symlink sh -c "cat xa* | \$DATA_DIR/bin/tar x -J --delay-directory-restore --preserve-permissions -v -C containers/0"
+#\$DATA_DIR/bin/proot --link2symlink sh -c "cat xa* | \$DATA_DIR/bin/tar x -J --delay-directory-restore --preserve-permissions -v -C containers/0"
+\$DATA_DIR/bin/proot --link2symlink sh -c "\$DATA_DIR/bin/tar x -J --delay-directory-restore --preserve-permissions -v -f xodos.tar.xz -C containers/0"
+
 #Script from proot-distro
 chmod u+rw "\$CONTAINER_DIR/etc/passwd" "\$CONTAINER_DIR/etc/shadow" "\$CONTAINER_DIR/etc/group" "\$CONTAINER_DIR/etc/gshadow"
 echo "aid_\$(id -un):x:\$(id -u):\$(id -g):Termux:/:/sbin/nologin" >> "\$CONTAINER_DIR/etc/passwd"
@@ -498,7 +508,9 @@ cat tmp3 | while read -r group_name group_id; do
 		echo "aid_\${group_name}:*::root,aid_\$(id -un)" >> "\$CONTAINER_DIR/etc/gshadow"
 	fi
 done
-\$DATA_DIR/bin/busybox rm -rf xa* tmp1 tmp2 tmp3
+#\$DATA_DIR/bin/busybox rm -rf xa* tmp1 tmp2 tmp3
+\$DATA_DIR/bin/busybox rm -rf xodos.tar.xz tmp1 tmp2 tmp3
+
 """);
     // Some data initialization
     // $DATA_DIR is the data folder, $CONTAINER_DIR is the container root directory
@@ -709,10 +721,10 @@ export PATH=\$DATA_DIR/bin:\$PATH
 export LD_LIBRARY_PATH=\$DATA_DIR/lib
 \$DATA_DIR/bin/busybox sed "s/4713/${Util.getGlobal("defaultAudioPort") as int}/g" \$DATA_DIR/bin/pulseaudio.conf > \$DATA_DIR/bin/pulseaudio.conf.tmp
 rm -rf \$TMPDIR/*
-TMPDIR=\$TMPDIR HOME=\$DATA_DIR/home XDG_CONFIG_HOME=\$TMPDIR LD_LIBRARY_PATH=\$DATA_DIR/bin:\$LD_LIBRARY_PATH \$DATA_DIR/bin/pulseaudio -F \$DATA_DIR/bin/pulseaudio.conf.tmp
-#exit
+TMPDIR=\$TMPDIR HOME=\$DATA_DIR/home XDG_CONFIG_HOME=\$TMPDIR LD_LIBRARY_PATH=\$DATA_DIR/bin:\$LD_LIBRARY_PATH \$DATA_DIR/bin/pulseaudio --daemonize=no --exit-idle-time=-1 -F \$DATA_DIR/bin/pulseaudio.conf.tmp
+
 """));
-  await G.audioPty?.exitCode;
+  //await G.audioPty?.exitCode;
   }
   static Future<void> launchCurrentContainer() async {
     String extraMount = ""; //mount options and other proot options
@@ -830,8 +842,8 @@ static Future<void> launchGUIBackend() async {
       Util.termWrite("$vncCmd > /dev/null 2>&1 &");
     }
   }
-  // Remove the clear command entirely
-  // Util.termWrite("clear"); // DELETE THIS LINE
+  // Remove the clear command
+  // Util.termWrite("clear"); // 
 }
 
   static Future<void> waitForConnection() async {
@@ -932,7 +944,7 @@ export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 pkill -f 'virgl_*'  2>/dev/null || true
 rm -f \${CONTAINER_DIR}/tmp/.virgl_test 2>/dev/null || true
 . /data/data/com.xodos/files/usr/opt/drv
-$androidVenusEnv virgl_test_server $venusCommand > \${CONTAINER_DIR}/venus.log 2>&1 &
+VK_ICD_FILENAMES=\$DATA_DIR/usr/share/vulkan/icd.d/wrapper_icd.aarch64.json $androidVenusEnv virgl_test_server $venusCommand > \${CONTAINER_DIR}/venus.log 2>&1 &
 export MESA_VK_WSI_PRESENT_MODE=mailbox
 export VN_DEBUG=vtest
 echo "Venus server started in background"
