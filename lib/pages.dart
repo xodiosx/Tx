@@ -1276,6 +1276,7 @@ OutlinedButton(
 }
 
 // Info Page
+
 // Info Page
 class InfoPage extends StatefulWidget {
   final bool openFirstInfo;
@@ -1301,7 +1302,7 @@ class _InfoPageState extends State<InfoPage> {
     _setupMusicPlayer();
   }
 
-  void _setupMusicPlayer() async {
+  Future<void> _setupMusicPlayer() async {
     try {
       await _gamesMusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _gamesMusicPlayer.setVolume(0.6);
@@ -1310,7 +1311,7 @@ class _InfoPageState extends State<InfoPage> {
     }
   }
 
-  void _startGamesMusic() async {
+  Future<void> _startGamesMusic() async {  // Changed to return Future<void>
     if (_isGamesMusicPlaying) return;
     
     try {
@@ -1325,7 +1326,7 @@ class _InfoPageState extends State<InfoPage> {
     }
   }
 
-  void _stopGamesMusic() async {
+  Future<void> _stopGamesMusic() async {  // Changed to return Future<void>
     if (!_isGamesMusicPlaying) return;
     
     try {
@@ -1351,7 +1352,7 @@ class _InfoPageState extends State<InfoPage> {
     await Future.delayed(const Duration(milliseconds: 50));
     
     // Start music when games load
-    await _startGamesMusic();
+    await _startGamesMusic();  // Now this is valid because it returns Future<void>
     
     setState(() {
       _gamesLoaded = true;
@@ -1748,7 +1749,7 @@ class _InfoPageState extends State<InfoPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Prevents app crashes and improves startup performance',
+                      'play games while waiting',
                       style: TextStyle(
                         color: Colors.orange[800],
                         fontSize: 14,
@@ -1788,7 +1789,6 @@ class _InfoPageState extends State<InfoPage> {
     );
   }
 }
-
 
 
 
