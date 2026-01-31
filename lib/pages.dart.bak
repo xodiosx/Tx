@@ -1768,6 +1768,7 @@ class TerminalPage extends StatefulWidget {
   State<TerminalPage> createState() => _TerminalPageState();
 }
 
+// Replace your entire _TerminalPageState class with this
 class _TerminalPageState extends State<TerminalPage> {
   @override
   Widget build(BuildContext context) {
@@ -1782,17 +1783,17 @@ class _TerminalPageState extends State<TerminalPage> {
             onScaleEnd: (details) async {
               await G.prefs.setDouble("termFontScale", G.termFontScale.value);
             }, 
-           child: ValueListenableBuilder(
-  valueListenable: G.termFontScale, 
-  builder: (context, value, child) {
-    return TerminalView(
-      G.termPtys[G.currentContainer]!.terminal, 
-      controller: G.termPtys[G.currentContainer]!.controller,
-      textScaler: TextScaler.linear(G.termFontScale.value), 
-      keyboardType: TextInputType.multiline,
-    );
-  },
-),
+            child: ValueListenableBuilder(
+              valueListenable: G.termFontScale, 
+              builder: (context, value, child) {
+                return TerminalView(
+                  G.termPtys[G.currentContainer]!.terminal, 
+                  controller: G.termPtys[G.currentContainer]!.controller,
+                  textScaler: TextScaler.linear(G.termFontScale.value), 
+                  keyboardType: TextInputType.multiline,
+                );
+              },
+            ),
           ),
         ), 
         ValueListenableBuilder(
@@ -2643,35 +2644,15 @@ class _WineSettingsDialogState extends State<WineSettingsDialog> {
     _loadSettings();
   }
   
-// In pages.dart, replace your _WineSettingsDialogState.dispose() with:
-@override
-void dispose() {
-  // Kill wine PTY
-  _winePty?.kill();
-  
-  // Clean up controllers
-  _displayController.dispose();
-  _winePrefixController.dispose();
-  _wineArchController.dispose();
-  _wineCommandController.dispose();
-  
-  // Kill any wine processes (Tiny Computer's method)
-  _killWineProcesses();
-  
-  super.dispose();
-}
-
-void _killWineProcesses() {
-  try {
-    // Kill wine processes
-    Process.run('pkill', ['-f', 'wine']);
-    Process.run('pkill', ['-f', 'winhandler.exe']);
-    Process.run('pkill', ['-f', 'wine-preloader']);
-    
-    // Kill explorer if running
-    Process.run('pkill', ['-f', 'explorer.exe']);
-  } catch (_) {}
-}
+  @override
+  void dispose() {
+    _winePty?.kill();
+    _displayController.dispose();
+    _winePrefixController.dispose();
+    _wineArchController.dispose();
+    _wineCommandController.dispose();
+    super.dispose();
+  }
   
   // ==============================
   // LOAD SETTINGS

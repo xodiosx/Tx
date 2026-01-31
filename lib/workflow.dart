@@ -1233,7 +1233,7 @@ print("patch and assets extracted,,,");
     
     G.updateText.value = AppLocalizations.of(G.homePageStateContext)!.copyingContainerSystem;
     // Folder 0 for storing containers and folder .l2s for storing hard links
-    Util.createDirFromStrinLD_PRELOAD="\$DATA_DIR"${G.dataPath}/containers/0/.l2s");
+    Util.createDirFromString("${G.dataPath}/containers/0/.l2s");
     // This is the container rootfs, split into xa* by split command, placed in assets
     // On first startup, use this, don't let the user choose another one
 
