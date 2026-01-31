@@ -35,17 +35,57 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool bannerAdsFailedToLoad = false;
   bool isLoadingComplete = false;
+  bool _isAppInBackground = false;
+  Timer? _cleanupTimer;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero,() {
-      _initializeWorkflow();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeWorkflow();
+    _setupPeriodicCleanup();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cleanupTimer?.cancel();
+    _forceCleanupBeforeExit();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        _isAppInBackground = true;
+        _pauseContainerOperations();
+        break;
+      case AppLifecycleState.resumed:
+        _isAppInBackground = false;
+        _resumeContainerOperations();
+        break;
+      case AppLifecycleState.detached:
+        _forceCleanupBeforeExit();
+        break;
+      case AppLifecycleState.hidden:
+        _isAppInBackground = true;
+        _pauseContainerOperations();
+        break;
+    }
+  }
+
+  void _setupPeriodicCleanup() {
+    // Tiny Computer does periodic cleanup every 30 seconds
+    _cleanupTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (_isAppInBackground) {
+        _aggressiveBackgroundCleanup();
+      }
     });
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
   }
 
   Future<void> _initializeWorkflow() async {
@@ -55,6 +95,83 @@ class _MyHomePageState extends State<MyHomePage> {
         isLoadingComplete = true;
       });
     }
+  }
+
+  void _pauseContainerOperations() {
+    // Pause terminal when app goes to background
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.pause();
+      } catch (_) {}
+    }
+    
+    // Kill wine processes to prevent ANR
+    _killProblematicProcesses();
+    
+    // Release unnecessary resources
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+
+  void _resumeContainerOperations() {
+    // Resume terminal when app comes to foreground
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.resume();
+      } catch (_) {}
+    }
+    
+    // Restore immersive mode
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
+  }
+
+  void _killProblematicProcesses() {
+    // Kill processes known to cause ANR
+    try {
+      // Wine processes that hold system resources
+      Process.run('pkill', ['-f', 'wineserver']);
+      Process.run('pkill', ['-f', 'wine-preloader']);
+      Process.run('pkill', ['-f', 'explorer.exe']);
+      
+      // Graphics servers
+      Process.run('pkill', ['-f', 'virgl_test_server']);
+      Process.run('pkill', ['-f', 'Xvfb']);
+      
+      // Audio servers that can conflict with system
+      Process.run('pkill', ['-f', 'pulseaudio']);
+      Process.run('pkill', ['-f', 'padsp']);
+    } catch (_) {}
+  }
+
+  void _aggressiveBackgroundCleanup() {
+    // More aggressive cleanup when app is in background
+    try {
+      // Clear terminal buffer to free memory
+      if (G.termPtys.containsKey(G.currentContainer)) {
+        G.termPtys[G.currentContainer]?.terminal.clearBuffer();
+      }
+      
+      // Free GPU memory
+      Process.run('sync', []);
+      Process.run('echo', ['3', '>', '/proc/sys/vm/drop_caches']);
+    } catch (_) {}
+  }
+
+  void _forceCleanupBeforeExit() {
+    // Force cleanup when app is exiting
+    _killProblematicProcesses();
+    
+    // Stop all PTY processes
+    for (final termPty in G.termPtys.values) {
+      try {
+        termPty.pty?.kill();
+      } catch (_) {}
+    }
+    
+    // Clear global state
+    G.termPtys.clear();
+    
+    // Ensure wakelock is released
+    WakelockPlus.toggle(enable: false);
   }
 
   @override
@@ -138,6 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
 
 //
 // Setting Page
@@ -1674,7 +1792,70 @@ class TerminalPage extends StatefulWidget {
   State<TerminalPage> createState() => _TerminalPageState();
 }
 
-class _TerminalPageState extends State<TerminalPage> {
+class _TerminalPageState extends State<TerminalPage> with WidgetsBindingObserver {
+  bool _isTerminalActive = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+  
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cleanupTerminalResources();
+    super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        _isTerminalActive = false;
+        _pauseTerminal();
+        break;
+      case AppLifecycleState.resumed:
+        _isTerminalActive = true;
+        _resumeTerminal();
+        break;
+      case AppLifecycleState.detached:
+        _cleanupTerminalResources();
+        break;
+    }
+  }
+  
+  void _pauseTerminal() {
+    // Pause terminal output when app is in background
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.pause();
+      } catch (_) {}
+    }
+  }
+  
+  void _resumeTerminal() {
+    // Resume terminal when app comes to foreground
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.resume();
+      } catch (_) {}
+    }
+  }
+  
+  void _cleanupTerminalResources() {
+    // Clear terminal buffers to free memory
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.clear();
+        G.termPtys[G.currentContainer]?.terminal.dispose();
+      } catch (_) {}
+    }
+  }
+  
+  // ... rest of your existing build method ...
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -2549,15 +2730,58 @@ class _WineSettingsDialogState extends State<WineSettingsDialog> {
     _loadSettings();
   }
   
-  @override
-  void dispose() {
-    _winePty?.kill();
-    _displayController.dispose();
-    _winePrefixController.dispose();
-    _wineArchController.dispose();
-    _wineCommandController.dispose();
-    super.dispose();
-  }
+@override
+void dispose() {
+  // Kill wine PTY and all child processes
+  _killWineProcessTree();
+  
+  // Clean up controllers
+  _displayController.dispose();
+  _winePrefixController.dispose();
+  _wineArchController.dispose();
+  _wineCommandController.dispose();
+  
+  // Clear environment variables that might persist
+  _cleanupEnvironment();
+  
+  // Cancel any pending operations
+  _monitorLoopCount = _maxMonitorLoops; // Stop monitoring
+  
+  super.dispose();
+}
+
+void _killWineProcessTree() {
+  // Kill the main wine PTY
+  _winePty?.kill();
+  
+  // Kill all wine-related processes aggressively
+  try {
+    // Use process groups to kill entire tree
+    if (_winePty != null && _winePty!.pid != null) {
+      Process.run('kill', ['-9', '-${_winePty!.pid}']);
+    }
+    
+    // Kill any remaining wine processes
+    Process.run('pkill', ['-9', '-f', 'wine']);
+    Process.run('pkill', ['-9', '-f', 'winhandler.exe']);
+    Process.run('pkill', ['-9', '-f', 'explorer.exe']);
+    Process.run('pkill', ['-9', '-f', 'wine-preloader']);
+    Process.run('pkill', ['-9', '-f', 'wineserver']);
+    
+    // Kill box64 if it's hanging
+    Process.run('pkill', ['-9', '-f', 'box64']);
+  } catch (_) {}
+}
+
+void _cleanupEnvironment() {
+  // Clear environment variables that might cause conflicts
+  try {
+    Process.run('unset', ['WINEPREFIX']);
+    Process.run('unset', ['WINEARCH']);
+    Process.run('unset', ['DISPLAY']);
+    Process.run('unset', ['LD_LIBRARY_PATH']);
+  } catch (_) {}
+}
   
   // ==============================
   // LOAD SETTINGS
