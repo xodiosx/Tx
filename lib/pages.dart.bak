@@ -132,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // Tiny Computer's exit cleanup logic
     try {
       // Kill all child processes
-      Process.run('pkill', ['-P', '$$']);
+      Process.run('pkill', ['-P', '\$\$']);
       
       // Kill wine processes
       Process.run('pkill', ['-f', 'wine']);

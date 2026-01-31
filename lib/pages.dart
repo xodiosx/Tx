@@ -52,7 +52,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _performExitCleanup(); // Tiny Computer's exact cleanup
+    Workflow.cleanupBeforeExit();
+    G.cleanup();; // Tiny Computer's exact cleanup
     super.dispose();
   }
 
@@ -234,6 +235,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 }
 //
+
 // Setting Page
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});

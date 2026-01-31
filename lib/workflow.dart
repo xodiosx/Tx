@@ -976,6 +976,16 @@ class TermPty{
   late final Pty pty;
   late final TerminalController controller;
 
+void dispose() {
+    pty?.kill();
+    pty = null;
+    // terminal.dispose(); // REMOVE THIS LINE if it exists
+    controller?.dispose();
+    controller = null;
+  }
+void kill() {
+    pty.kill();
+  }
   TermPty() {
     controller = TerminalController();
     terminal = Terminal(
@@ -1022,125 +1032,56 @@ class TermPty{
   }
 }
 
+
 // Global variables
-// Global variables with proper lifecycle management
 class G {
-  // Static variables
+
+static VoidCallback? onExtractionComplete;
+  
   static late final String dataPath;
   static Pty? audioPty;
   static late WebViewController controller;
   static late BuildContext homePageStateContext;
-  static late int currentContainer;
-  static late Map<int, TermPty> termPtys;
-  static late VirtualKeyboard keyboard;
-  static bool maybeCtrlJ = false;
+  static late int currentContainer; // Currently running which container
+  static late Map<int, TermPty> termPtys; // Store TermPty data for container<int>
+  static late VirtualKeyboard keyboard; // Store ctrl, shift, alt state
+  static bool maybeCtrlJ = false; // Variable prepared to distinguish between pressed ctrl+J and enter
+  static ValueNotifier<double> termFontScale = ValueNotifier(1); // Terminal font size, stored as G.prefs' termFontScale
+  static bool isStreamServerStarted = false;
+  static bool isStreaming = false;
+  //static int? streamingPid;
+  static String streamingOutput = "";
+  static late Pty streamServerPty;
+  //static int? virglPid;
+  static ValueNotifier<int> pageIndex = ValueNotifier(0); // Main interface index
+  static ValueNotifier<bool> terminalPageChange = ValueNotifier(true); // Change value, used to refresh numpad
+  static ValueNotifier<bool> bootTextChange = ValueNotifier(true); // Change value, used to refresh boot command
+  static ValueNotifier<String> updateText = ValueNotifier("xodos"); // Description text on loading screen
+  static String postCommand = ""; // Additional command to run when first entering the container
   
-  // ValueNotifiers - MUST be disposed
-  static ValueNotifier<double> termFontScale = ValueNotifier(1);
-  static ValueNotifier<int> pageIndex = ValueNotifier(0);
-  static ValueNotifier<bool> terminalPageChange = ValueNotifier(true);
-  static ValueNotifier<bool> bootTextChange = ValueNotifier(true);
-  static ValueNotifier<String> updateText = ValueNotifier("xodos");
-  
-  static String postCommand = "";
   static bool wasAvncEnabled = false;
   static bool wasX11Enabled = false;
+
   static late SharedPreferences prefs;
-  
-  // Background process trackers
-  static final List<Process> _backgroundProcesses = [];
-  static final List<Pty> _activePtys = [];
-  static bool _isDisposed = false;
-  
-  // Add process to tracker
-  static void trackBackgroundProcess(Process process) {
-    if (!_isDisposed) {
-      _backgroundProcesses.add(process);
-    }
-  }
-  
-  // Add Pty to tracker
-  static void trackPty(Pty pty) {
-    if (!_isDisposed) {
-      _activePtys.add(pty);
-    }
-  }
-  
-  // CRITICAL: Dispose all resources - called when app closes
-  static Future<void> disposeAll() async {
-    if (_isDisposed) return;
+  static void cleanup() {
+    // 1. Kill audio
+    audioPty?.kill();
+    audioPty = null;
     
-    print('🔄 Disposing all G resources...');
+    // 2. Kill all terminals
+    for (var entry in termPtys.entries) {
+      entry.value.pty.kill();
+    }
+    termPtys.clear();
     
-    // 1. Dispose ValueNotifiers
+    // 3. Clear any ValueNotifier listeners (optional)
     termFontScale.dispose();
     pageIndex.dispose();
     terminalPageChange.dispose();
     bootTextChange.dispose();
     updateText.dispose();
-    
-    // 2. Kill all background processes
-    for (var process in _backgroundProcesses) {
-      try {
-        process.kill();
-      } catch (e) {
-        print('Warning: Failed to kill process: $e');
-      }
-    }
-    
-    // 3. Kill all active PTYs
-    for (var pty in _activePtys) {
-      try {
-        pty.kill();
-      } catch (e) {
-        print('Warning: Failed to kill pty: $e');
-      }
-    }
-    
-    // 4. Kill audio PTY
-    audioPty?.kill();
-    audioPty = null;
-    
-    // 5. Clear terminal PTYs
-    for (var entry in termPtys.entries) {
-      try {
-        entry.value.dispose();
-      } catch (e) {
-        print('Warning: Failed to dispose TermPty: $e');
-      }
-    }
-    termPtys.clear();
-    
-    // 6. Dispose keyboard
-    keyboard.dispose();
-    
-    // 7. Clear webview cache
-    try {
-      await controller.clearCache();
-      await controller.clearLocalStorage();
-    } catch (e) {
-      print('Warning: Failed to clear webview: $e');
-    }
-    
-    // 8. Reset state
-    _backgroundProcesses.clear();
-    _activePtys.clear();
-    _isDisposed = true;
-    
-    print('✅ All G resources disposed');
-  }
-  
-  // Reset for fresh start (when reopening app)
-  static Future<void> resetForNewSession() async {
-    await disposeAll();
-    _isDisposed = false;
-    termPtys = {};
-    keyboard = VirtualKeyboard(defaultInputHandler);
   }
 }
-
-
-
 
 class Workflow {
 
@@ -1426,7 +1367,7 @@ prefixsh="/data/data/com.xodos/files/usr/bin"
     export TERMUX_APP__VERSION_CODE=$versionCode
     export TERMUX_VERSION=$versionName
     export EXTERNAL_STORAGE=/sdcard
-    export LD_PRELOAD=/data/data/com.xodos/files/usr/lib/libtermux-exec-ld-preload.so
+    #export LD_PRELOAD=/data/data/com.xodos/files/usr/lib/libtermux-exec-ld-preload.so
     export HOME=/data/data/com.xodos/files/home
     export LANG=en_US.UTF-8
     export SHELL_CMD__TERMINAL_SESSION_NUMBER_SINCE_BOOT=0    
@@ -1505,6 +1446,26 @@ TMPDIR=\$TMPDIR HOME=\$DATA_DIR/home XDG_CONFIG_HOME=\$TMPDIR LD_LIBRARY_PATH=\$
 """));
   //await G.audioPty?.exitCode;
   }
+  
+  static Future<void> cleanupBeforeExit() async {
+    // 1. Kill audio PTY
+    G.audioPty?.kill();
+    G.audioPty = null;
+    
+    // 2. Kill all terminal PTYs
+    for (var termPty in G.termPtys.values) {
+      termPty.pty.kill();
+    }
+    G.termPtys.clear();
+    
+    // 3. Clear webview cache (if needed)
+    try {
+      await G.controller.clearCache();
+    } catch (e) {
+      // Ignore errors
+    }
+  }
+
   static Future<void> launchCurrentContainer() async {
     String extraMount = ""; //mount options and other proot options
     String extraOpt = "";
