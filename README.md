@@ -1,9 +1,10 @@
-# XoDos Rebirth 🐧📱
+# XoDos Rebirth 
 <p align="center">
   <img src="icon.png" alt="XoDos Logo" width="200" height="200">
 </p>
-
-[![GitHub Release](https://img.shields.io/badge/Release-Coming_Soon-orange)](https://github.com/xodiosx/XoDos2/releases)
+<div align="center">
+  
+[![GitHub Release](https://img.shields.io/badge/Releases-orange)](https://github.com/xodiosx/XoDos2/releases)
 [![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue)](https://t.me/xodemulatorr)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Community-7289da)](https://discord.gg/d2ChVhPfnF)
 
@@ -13,14 +14,15 @@
 >
 > **"Awakening is not changing who you are, but discarding who you are not."** - Deepak Chopra
 
-**XoDos** is a revolutionary Linux desktop environment that runs seamlessly on Android devices, bringing the full power of Linux to your mobile device without conflicts with other applications.
-
-> 🚧 **Work in Progress** - First release expected around New Year!
+![splash Preview](https://raw.githubusercontent.com/xodiosx/XoDos2/refs/heads/main/extra/splash.gif)
 
 ## ✨ What is XoDos?
-
+**XoDos** is a revolutionary Linux desktop environment that runs seamlessly on Android devices, bringing the full power of Linux to your mobile device without conflicts with other applications.
+![Demo Preview](https://raw.githubusercontent.com/xodiosx/XoDos2/refs/heads/main/extra/demo.gif)
 XoDos is the next evolution of the original [XoDos](https://github.com/xodiosx/XoDos) project, now reimagined and rebuilt from the ground up. Inspired by the [tiny computer project](https://github.com/Cateners/tiny_computer), XoDos offers:
+<!-- Your entire README content here -->
 
+</div>
 - **🔄 Conflict-Free**: Designed not to interfere with Termux, Termux X11, or other Android applications
 - **🚀 Standalone Experience**: A complete Linux desktop environment running natively on Android
 - **📱 Mobile-Optimized**: Tailored specifically for Android devices and touch interfaces
@@ -38,21 +40,44 @@ XoDos is the next evolution of the original [XoDos](https://github.com/xodiosx/X
 
 ## 📥 Installation
 
-> ⚠️ **Note**: XoDos is currently under active development. The first official release will be available soon in the [GitHub Releases](https://github.com/xodiosx/XoDos2/releases) section.
+- just download and install and wait until desktop opens up
 
-Stay tuned for installation instructions when the first release becomes available!
+## 📚fix phantom process killer (wiki)
+- on Android higher than 11 the app stops working suddenly became android phantom process killer that needs to be disabled first, read more
+[here & (fix)](https://github.com/xodiosx/XoDos2/blob/main/phantom.md)
+[and here)](https://github.com/xodiosx/XoDos2/blob/main/signal9fix.md)
+
+--------------------------------------------------------------------------------------------
+
+> 📥 **Download**: XoDo first official release will be available soon in the [GitHub Releases](https://github.com/xodiosx/XoDos2/releases) section.
+
+
 
 ## 🛠️ Development Status
 
 XoDos is currently in active development. We're working hard to deliver a stable and feature-rich experience. Here's what to expect:
 
-- [ ] Core Linux environment integration
-- [ ] Windows environment integration (wine / box64)
-- [ ] Desktop environment setup
-- [ ] Android compatibility layer
-- [ ] User interface optimization
-- [ ] Performance tuning
-- [ ] Initial release preparation
+- [✓] Core Linux environment integration
+- [✓] Windows environment integration (wine / box64)
+- [✓] Desktop environment setup
+- [✓] Android compatibility layer
+- [✓] User interface optimization
+- [✓] Performance tuning
+- [✓] touch gamepad controls
+- [✓] easy wine settings
+- [✓] gamepad support
+- [✓] More GPU drivers for Android devices
+- [✓] native android bionic terminal shell support
+
+## building rootfs using termux or other Linux terminal
+[XoDos Proot(rootfs)](https://github.com/xodiosx/XoDos2/tree/main/extra/rootfs)
+
+for flutter just clone this repo and build using flutter SDK and android SDK make sure
+the building environment is ready with Android sdk and Java jdk and ndk and using this command
+
+```
+git clone https://github.com/xodiosx/XoDos2.git && cd XoDos2 && flutter build apk --target-platform android-arm64 --split-per-abi
+```
 
 ## 🤝 Contributing
 
