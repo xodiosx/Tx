@@ -1276,10 +1276,11 @@ OutlinedButton(
 }
 
 // Info Page
+// Info Page
 class InfoPage extends StatefulWidget {
   final bool openFirstInfo;
 
-  const InfoPage({super.key, this.openFirstInfo=false});
+  const InfoPage({super.key, this.openFirstInfo = false});
 
   @override
   State<InfoPage> createState() => _InfoPageState();
@@ -1289,6 +1290,8 @@ class _InfoPageState extends State<InfoPage> {
   final List<bool> _expandState = [false, false, false, false, false];
   late AudioPlayer _gamesMusicPlayer;
   bool _isGamesMusicPlaying = false;
+  bool _gamesLoaded = false;
+  bool _isLoadingGames = false;
   
   @override
   void initState() {
@@ -1337,6 +1340,33 @@ class _InfoPageState extends State<InfoPage> {
     }
   }
 
+  Future<void> _loadGames() async {
+    if (_isLoadingGames || _gamesLoaded) return;
+    
+    setState(() {
+      _isLoadingGames = true;
+    });
+    
+    // Give UI time to show loading state
+    await Future.delayed(const Duration(milliseconds: 50));
+    
+    // Start music when games load
+    await _startGamesMusic();
+    
+    setState(() {
+      _gamesLoaded = true;
+      _isLoadingGames = false;
+    });
+  }
+
+  void _unloadGames() {
+    setState(() {
+      _gamesLoaded = false;
+      _isLoadingGames = false;
+    });
+    _stopGamesMusic();
+  }
+
   @override
   void dispose() {
     _stopGamesMusic();
@@ -1352,9 +1382,11 @@ class _InfoPageState extends State<InfoPage> {
       expansionCallback: (panelIndex, isExpanded) {
         if (panelIndex == 1) {
           if (isExpanded) {
-            _startGamesMusic();
+            // Do NOT load games automatically when expanded
+            // Wait for user to press Start button
           } else {
-            _stopGamesMusic();
+            // When collapsing, unload games and stop music
+            _unloadGames();
           }
         }
         
@@ -1367,32 +1399,60 @@ class _InfoPageState extends State<InfoPage> {
           headerBuilder: (context, isExpanded) {
             return ListTile(title: Text(AppLocalizations.of(context)!.userManual));
           },
-          body: Padding(padding: const EdgeInsets.all(8), child: Column(
-            children: [
-              Text(AppLocalizations.of(context)!.firstLoadInstructions),
-              const SizedBox.square(dimension: 16),
-              Wrap(alignment: WrapAlignment.center, spacing: 4.0, runSpacing: 4.0, children: [
-                OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.requestStoragePermission), onPressed: () {
-                  Permission.storage.request();
-                }),
-                OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.requestAllFilesAccess), onPressed: () {
-                  Permission.manageExternalStorage.request();
-                }),
-                OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.ignoreBatteryOptimization), onPressed: () {
-                  Permission.ignoreBatteryOptimizations.request();
-                }),
-              ]),
-              const SizedBox.square(dimension: 16),
-              Text(AppLocalizations.of(context)!.updateRequest),
-              const SizedBox.square(dimension: 16),
-              Wrap(alignment: WrapAlignment.center, spacing: 4.0, runSpacing: 4.0, children: D.links
-              .asMap().entries.map<Widget>((e) {
-                return OutlinedButton(style: D.commandButtonStyle, child: Text(Util.getl10nText(e.value["name"]!, context)), onPressed: () {
-                  launchUrl(Uri.parse(e.value["value"]!), mode: LaunchMode.externalApplication);
-                });
-              }).toList()),
-            ],
-          )),
+          body: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: [
+                Text(AppLocalizations.of(context)!.firstLoadInstructions),
+                const SizedBox.square(dimension: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 4.0,
+                  runSpacing: 4.0,
+                  children: [
+                    OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(AppLocalizations.of(context)!.requestStoragePermission),
+                      onPressed: () {
+                        Permission.storage.request();
+                      },
+                    ),
+                    OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(AppLocalizations.of(context)!.requestAllFilesAccess),
+                      onPressed: () {
+                        Permission.manageExternalStorage.request();
+                      },
+                    ),
+                    OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(AppLocalizations.of(context)!.ignoreBatteryOptimization),
+                      onPressed: () {
+                        Permission.ignoreBatteryOptimizations.request();
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox.square(dimension: 16),
+                Text(AppLocalizations.of(context)!.updateRequest),
+                const SizedBox.square(dimension: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 4.0,
+                  runSpacing: 4.0,
+                  children: D.links.asMap().entries.map<Widget>((e) {
+                    return OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(Util.getl10nText(e.value["name"]!, context)),
+                      onPressed: () {
+                        launchUrl(Uri.parse(e.value["value"]!), mode: LaunchMode.externalApplication);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
           isExpanded: _expandState[0],
         ),
         ExpansionPanel(
@@ -1400,54 +1460,128 @@ class _InfoPageState extends State<InfoPage> {
           headerBuilder: ((context, isExpanded) {
             return ListTile(
               title: Text(AppLocalizations.of(context)!.mindTwisterGames),
-              subtitle: Text(_isGamesMusicPlaying 
-                ? AppLocalizations.of(context)!.extractionInProgress 
-                : AppLocalizations.of(context)!.playWhileWaiting),
+              subtitle: _gamesLoaded
+                  ? Text(_isGamesMusicPlaying
+                      ? AppLocalizations.of(context)!.extractionInProgress
+                      : AppLocalizations.of(context)!.playWhileWaiting)
+                  : const Text('Click "Start Games" to load'),
             );
-          }), 
-          body: _buildGamesSection(),
+          }),
+          body: _isLoadingGames
+              ? _buildGamesLoading()
+              : _buildGamesSection(),
         ),
         ExpansionPanel(
-        isExpanded: _expandState[2],
-        headerBuilder: ((context, isExpanded) {
-          return ListTile(title: Text(AppLocalizations.of(context)!.fileAccess));
-        }), body: Padding(padding: const EdgeInsets.all(12), child: Column(children: [
-          Text(AppLocalizations.of(context)!.fileAccessHint),
-          const SizedBox.square(dimension: 16),
-          Wrap(alignment: WrapAlignment.center, spacing: 4.0, runSpacing: 4.0, children: [
-            OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.requestStoragePermission), onPressed: () {
-              Permission.storage.request();
-            }),
-            OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.requestAllFilesAccess), onPressed: () {
-              Permission.manageExternalStorage.request();
-            }),
-            OutlinedButton(style: D.commandButtonStyle, child: Text(AppLocalizations.of(context)!.fileAccessGuide), onPressed: () {
-              launchUrl(Uri.parse("https://github.com/xodiosx/XoDos2/blob/main/fileaccess.md"), mode: LaunchMode.externalApplication);
-            }),
-          ]),
-          const SizedBox.square(dimension: 16),
-        ],))),
+          isExpanded: _expandState[2],
+          headerBuilder: ((context, isExpanded) {
+            return ListTile(title: Text(AppLocalizations.of(context)!.fileAccess));
+          }),
+          body: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                Text(AppLocalizations.of(context)!.fileAccessHint),
+                const SizedBox.square(dimension: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 4.0,
+                  runSpacing: 4.0,
+                  children: [
+                    OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(AppLocalizations.of(context)!.requestStoragePermission),
+                      onPressed: () {
+                        Permission.storage.request();
+                      },
+                    ),
+                    OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(AppLocalizations.of(context)!.requestAllFilesAccess),
+                      onPressed: () {
+                        Permission.manageExternalStorage.request();
+                      },
+                    ),
+                    OutlinedButton(
+                      style: D.commandButtonStyle,
+                      child: Text(AppLocalizations.of(context)!.fileAccessGuide),
+                      onPressed: () {
+                        launchUrl(Uri.parse("https://github.com/xodiosx/XoDos2/blob/main/fileaccess.md"),
+                            mode: LaunchMode.externalApplication);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox.square(dimension: 16),
+              ],
+            ),
+          ),
+        ),
         ExpansionPanel(
           isExpanded: _expandState[3],
           headerBuilder: ((context, isExpanded) {
             return ListTile(title: Text(AppLocalizations.of(context)!.permissionUsage));
-          }), body: Padding(padding: const EdgeInsets.all(8), child: Text(AppLocalizations.of(context)!.privacyStatement))),
+          }),
+          body: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(AppLocalizations.of(context)!.privacyStatement),
+          ),
+        ),
         ExpansionPanel(
           isExpanded: _expandState[4],
           headerBuilder: ((context, isExpanded) {
             return ListTile(title: Text(AppLocalizations.of(context)!.supportAuthor));
-          }), body: Column(
-          children: [
-            Padding(padding: const EdgeInsets.all(8), child: Text(AppLocalizations.of(context)!.recommendApp)),
-            ElevatedButton(
-              onPressed: () {
-                launchUrl(Uri.parse("https://github.com/xodiosx/XoDos2"), mode: LaunchMode.externalApplication);
-              },
-              child: Text(AppLocalizations.of(context)!.projectUrl),
-            ),
-          ]
-        )),
+          }),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(AppLocalizations.of(context)!.recommendApp),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  launchUrl(Uri.parse("https://github.com/xodiosx/XoDos2"), mode: LaunchMode.externalApplication);
+                },
+                child: Text(AppLocalizations.of(context)!.projectUrl),
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildGamesLoading() {
+    return Container(
+      height: 600,
+      margin: const EdgeInsets.all(8),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFBB86FC)),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Loading Games...',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'This may take a moment',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1460,45 +1594,203 @@ class _InfoPageState extends State<InfoPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: _gamesLoaded ? Colors.green.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green),
+              border: Border.all(color: _gamesLoaded ? Colors.green : Colors.blue),
             ),
             child: Row(
               children: [
-                Text(
-                  '🎮 ${AppLocalizations.of(context)!.gameModeActive}',
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    _gamesLoaded
+                        ? '🎮 ${AppLocalizations.of(context)!.gameModeActive}'
+                        : '🎮 Games Ready to Load',
+                    style: TextStyle(
+                      color: _gamesLoaded ? Colors.green : Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    _isGamesMusicPlaying ? Icons.music_note : Icons.music_off,
-                    color: _isGamesMusicPlaying ? const Color(0xFFBB86FC) : Colors.grey,
+                if (_gamesLoaded)
+                  IconButton(
+                    icon: Icon(
+                      _isGamesMusicPlaying ? Icons.music_note : Icons.music_off,
+                      color: _isGamesMusicPlaying ? const Color(0xFFBB86FC) : Colors.grey,
+                    ),
+                    onPressed: () {
+                      if (_isGamesMusicPlaying) {
+                        _stopGamesMusic();
+                      } else {
+                        _startGamesMusic();
+                      }
+                    },
                   ),
-                  onPressed: () {
-                    if (_isGamesMusicPlaying) {
-                      _stopGamesMusic();
-                    } else {
-                      _startGamesMusic();
-                    }
-                  },
-                ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: SpiritedMiniGamesView(),
+            child: _gamesLoaded
+                ? SpiritedMiniGamesView()
+                : _buildStartButton(),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildStartButton() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Big Game Icon
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.purple.withOpacity(0.1),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.purple, width: 3),
+              ),
+              child: Icon(
+                Icons.videogame_asset,
+                size: 70,
+                color: Colors.purple,
+              ),
+            ),
+            
+            const SizedBox(height: 30),
+            
+            // Title
+            Text(
+              'Mini Games',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+                letterSpacing: 1.5,
+              ),
+            ),
+            
+            const SizedBox(height: 10),
+            
+            // Subtitle
+            Text(
+              'On-Demand Loading',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.purple[700],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            
+            const SizedBox(height: 25),
+            
+            // Description
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Games are not loaded automatically to prevent performance issues.\nClick below to load them when needed.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 35),
+            
+            // Big Start Button
+            SizedBox(
+              width: 280,
+              height: 70,
+              child: ElevatedButton.icon(
+                icon: Icon(Icons.play_arrow, size: 32),
+                label: Text(
+                  'START GAMES',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 8,
+                  shadowColor: Colors.purple.withOpacity(0.5),
+                ),
+                onPressed: _loadGames,
+              ),
+            ),
+            
+            const SizedBox(height: 25),
+            
+            // Performance Note
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orange),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info, color: Colors.orange),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Prevents app crashes and improves startup performance',
+                      style: TextStyle(
+                        color: Colors.orange[800],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 15),
+            
+            // Optional: Add a "Load Without Music" button
+            TextButton.icon(
+              icon: Icon(Icons.games, size: 20),
+              label: Text('Load Games Without Music'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue,
+              ),
+              onPressed: () async {
+                setState(() {
+                  _isLoadingGames = true;
+                });
+                
+                await Future.delayed(const Duration(milliseconds: 50));
+                
+                setState(() {
+                  _gamesLoaded = true;
+                  _isLoadingGames = false;
+                  _isGamesMusicPlaying = false;
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+
+
 
 // Loading Page
 class LoadingPage extends StatelessWidget {

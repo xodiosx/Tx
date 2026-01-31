@@ -33,6 +33,7 @@ import 'package:x11_flutter/x11_flutter.dart';
 // Import the mini games
 import 'spirited_mini_games.dart';
 import 'debug.dart';
+import 'main.dart';
 import 'app_colors.dart';
 
 // Modern color scheme with dark purple theme
