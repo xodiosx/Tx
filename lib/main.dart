@@ -18,9 +18,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-import 'constants.dart';
-import 'default_values.dart';
-import 'core_classes.dart';
+
+import 'workflow.dart';
 import 'spirited_mini_games.dart';
 import 'pages.dart';  // ← ADD THIS IMPORT
 import 'dialogs.dart'; // ← ADD THIS IMPORT
