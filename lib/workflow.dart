@@ -1,6 +1,5 @@
-// core_classes.dart
-
-// Keep ALL the original imports from the combined file
+// workflow.dart
+// XoDos
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
@@ -1024,36 +1023,124 @@ class TermPty{
 }
 
 // Global variables
+// Global variables with proper lifecycle management
 class G {
-
-static VoidCallback? onExtractionComplete;
-  
+  // Static variables
   static late final String dataPath;
   static Pty? audioPty;
   static late WebViewController controller;
   static late BuildContext homePageStateContext;
-  static late int currentContainer; // Currently running which container
-  static late Map<int, TermPty> termPtys; // Store TermPty data for container<int>
-  static late VirtualKeyboard keyboard; // Store ctrl, shift, alt state
-  static bool maybeCtrlJ = false; // Variable prepared to distinguish between pressed ctrl+J and enter
-  static ValueNotifier<double> termFontScale = ValueNotifier(1); // Terminal font size, stored as G.prefs' termFontScale
-  static bool isStreamServerStarted = false;
-  static bool isStreaming = false;
-  //static int? streamingPid;
-  static String streamingOutput = "";
-  static late Pty streamServerPty;
-  //static int? virglPid;
-  static ValueNotifier<int> pageIndex = ValueNotifier(0); // Main interface index
-  static ValueNotifier<bool> terminalPageChange = ValueNotifier(true); // Change value, used to refresh numpad
-  static ValueNotifier<bool> bootTextChange = ValueNotifier(true); // Change value, used to refresh boot command
-  static ValueNotifier<String> updateText = ValueNotifier("xodos"); // Description text on loading screen
-  static String postCommand = ""; // Additional command to run when first entering the container
+  static late int currentContainer;
+  static late Map<int, TermPty> termPtys;
+  static late VirtualKeyboard keyboard;
+  static bool maybeCtrlJ = false;
   
+  // ValueNotifiers - MUST be disposed
+  static ValueNotifier<double> termFontScale = ValueNotifier(1);
+  static ValueNotifier<int> pageIndex = ValueNotifier(0);
+  static ValueNotifier<bool> terminalPageChange = ValueNotifier(true);
+  static ValueNotifier<bool> bootTextChange = ValueNotifier(true);
+  static ValueNotifier<String> updateText = ValueNotifier("xodos");
+  
+  static String postCommand = "";
   static bool wasAvncEnabled = false;
   static bool wasX11Enabled = false;
-
   static late SharedPreferences prefs;
+  
+  // Background process trackers
+  static final List<Process> _backgroundProcesses = [];
+  static final List<Pty> _activePtys = [];
+  static bool _isDisposed = false;
+  
+  // Add process to tracker
+  static void trackBackgroundProcess(Process process) {
+    if (!_isDisposed) {
+      _backgroundProcesses.add(process);
+    }
+  }
+  
+  // Add Pty to tracker
+  static void trackPty(Pty pty) {
+    if (!_isDisposed) {
+      _activePtys.add(pty);
+    }
+  }
+  
+  // CRITICAL: Dispose all resources - called when app closes
+  static Future<void> disposeAll() async {
+    if (_isDisposed) return;
+    
+    print('🔄 Disposing all G resources...');
+    
+    // 1. Dispose ValueNotifiers
+    termFontScale.dispose();
+    pageIndex.dispose();
+    terminalPageChange.dispose();
+    bootTextChange.dispose();
+    updateText.dispose();
+    
+    // 2. Kill all background processes
+    for (var process in _backgroundProcesses) {
+      try {
+        process.kill();
+      } catch (e) {
+        print('Warning: Failed to kill process: $e');
+      }
+    }
+    
+    // 3. Kill all active PTYs
+    for (var pty in _activePtys) {
+      try {
+        pty.kill();
+      } catch (e) {
+        print('Warning: Failed to kill pty: $e');
+      }
+    }
+    
+    // 4. Kill audio PTY
+    audioPty?.kill();
+    audioPty = null;
+    
+    // 5. Clear terminal PTYs
+    for (var entry in termPtys.entries) {
+      try {
+        entry.value.dispose();
+      } catch (e) {
+        print('Warning: Failed to dispose TermPty: $e');
+      }
+    }
+    termPtys.clear();
+    
+    // 6. Dispose keyboard
+    keyboard.dispose();
+    
+    // 7. Clear webview cache
+    try {
+      await controller.clearCache();
+      await controller.clearLocalStorage();
+    } catch (e) {
+      print('Warning: Failed to clear webview: $e');
+    }
+    
+    // 8. Reset state
+    _backgroundProcesses.clear();
+    _activePtys.clear();
+    _isDisposed = true;
+    
+    print('✅ All G resources disposed');
+  }
+  
+  // Reset for fresh start (when reopening app)
+  static Future<void> resetForNewSession() async {
+    await disposeAll();
+    _isDisposed = false;
+    termPtys = {};
+    keyboard = VirtualKeyboard(defaultInputHandler);
+  }
 }
+
+
+
 
 class Workflow {
 
@@ -1146,7 +1233,7 @@ print("patch and assets extracted,,,");
     
     G.updateText.value = AppLocalizations.of(G.homePageStateContext)!.copyingContainerSystem;
     // Folder 0 for storing containers and folder .l2s for storing hard links
-    Util.createDirFromString("${G.dataPath}/containers/0/.l2s");
+    Util.createDirFromStrinLD_PRELOAD="\$DATA_DIR"${G.dataPath}/containers/0/.l2s");
     // This is the container rootfs, split into xa* by split command, placed in assets
     // On first startup, use this, don't let the user choose another one
 

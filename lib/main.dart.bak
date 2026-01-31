@@ -30,8 +30,124 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+// main_app.dart - Replace the entire MyApp class
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  AppLifecycleState _appLifecycleState = AppLifecycleState.resumed;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeAppLifecycle();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _appLifecycleState = state;
+    });
+    
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        _handleAppPaused();
+        break;
+      case AppLifecycleState.resumed:
+        _handleAppResumed();
+        break;
+      case AppLifecycleState.detached:
+        _handleAppDetached();
+        break;
+      case AppLifecycleState.hidden:
+        _handleAppHidden();
+        break;
+    }
+  }
+
+  void _initializeAppLifecycle() async {
+    // Ensure wakelock follows settings
+    final wakelockEnabled = Util.getGlobal("wakelock") as bool;
+    WakelockPlus.toggle(enable: wakelockEnabled && _appLifecycleState == AppLifecycleState.resumed);
+  }
+
+  void _handleAppPaused() {
+    // Pause all active processes when app loses focus
+    if (Util.getGlobal("wakelock") as bool) {
+      WakelockPlus.toggle(enable: false);
+    }
+    
+    // Pause terminal input
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.pause();
+      } catch (_) {}
+    }
+    
+    // Kill background wine processes that could cause ANR
+    _killBackgroundWineProcesses();
+  }
+
+  void _handleAppResumed() {
+    // Restore wakelock if enabled
+    if (Util.getGlobal("wakelock") as bool) {
+      WakelockPlus.toggle(enable: true);
+    }
+    
+    // Resume terminal
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.resume();
+      } catch (_) {}
+    }
+  }
+
+  void _handleAppDetached() {
+    // Force cleanup when app is being destroyed
+    _forceCleanupAllResources();
+  }
+
+  void _handleAppHidden() {
+    // Similar to paused but more aggressive
+    _handleAppPaused();
+  }
+
+  void _killBackgroundWineProcesses() {
+    // Tiny Computer aggressively kills background processes to prevent ANR
+    try {
+      Process.run('pkill', ['-f', 'wine']);
+      Process.run('pkill', ['-f', 'winhandler.exe']);
+      Process.run('pkill', ['-f', 'virgl_test_server']);
+      Process.run('pkill', ['-f', 'box64']);
+    } catch (_) {}
+  }
+
+  void _forceCleanupAllResources() {
+    // Cleanup all resources when app is destroyed
+    _killBackgroundWineProcesses();
+    
+    // Release wakelock
+    WakelockPlus.toggle(enable: false);
+    
+    // Clear terminal buffers
+    if (G.termPtys.containsKey(G.currentContainer)) {
+      try {
+        G.termPtys[G.currentContainer]?.terminal.clear();
+      } catch (_) {}
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,13 +177,13 @@ class MyApp extends StatelessWidget {
       theme: _buildDarkTheme(),
       darkTheme: _buildDarkTheme(),
       themeMode: ThemeMode.dark,
-      home: MyHomePage(title: "XoDos"), // REMOVED const
+      home: const MyHomePage(title: "XoDos"),
     );
   }
 
   ThemeData _buildDarkTheme() {
+    // Keep your existing theme code
     final baseTheme = ThemeData.dark(useMaterial3: true);
-    
     return baseTheme.copyWith(
       colorScheme: baseTheme.colorScheme.copyWith(
         primary: Colors.blue,
@@ -104,7 +220,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 // Remove AppColors class from here - it's now in app_colors.dart
 
 // Keep RTLWrapper, AspectRatioMax1To1, FakeLoadingStatus, etc. classes

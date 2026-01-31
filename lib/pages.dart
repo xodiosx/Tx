@@ -35,57 +35,48 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+// Replace your entire _MyHomePageState class with this
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool bannerAdsFailedToLoad = false;
   bool isLoadingComplete = false;
-  bool _isAppInBackground = false;
-  Timer? _cleanupTimer;
+  bool _appInBackground = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
     _initializeWorkflow();
-    _setupPeriodicCleanup();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _cleanupTimer?.cancel();
-    _forceCleanupBeforeExit();
+    _performExitCleanup(); // Tiny Computer's exact cleanup
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Tiny Computer's exact lifecycle handling
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
-        _isAppInBackground = true;
-        _pauseContainerOperations();
+        _appInBackground = true;
+        _handleAppBackground();
         break;
       case AppLifecycleState.resumed:
-        _isAppInBackground = false;
-        _resumeContainerOperations();
+        _appInBackground = false;
+        _handleAppForeground();
         break;
       case AppLifecycleState.detached:
-        _forceCleanupBeforeExit();
+        _performExitCleanup();
         break;
       case AppLifecycleState.hidden:
-        _isAppInBackground = true;
-        _pauseContainerOperations();
+        _appInBackground = true;
+        _handleAppBackground();
         break;
     }
-  }
-
-  void _setupPeriodicCleanup() {
-    // Tiny Computer does periodic cleanup every 30 seconds
-    _cleanupTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      if (_isAppInBackground) {
-        _aggressiveBackgroundCleanup();
-      }
-    });
   }
 
   Future<void> _initializeWorkflow() async {
@@ -97,81 +88,68 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
-  void _pauseContainerOperations() {
-    // Pause terminal when app goes to background
-    if (G.termPtys.containsKey(G.currentContainer)) {
-      try {
-        G.termPtys[G.currentContainer]?.terminal.pause();
-      } catch (_) {}
+  void _handleAppBackground() {
+    // Tiny Computer's background logic
+    if (Util.getGlobal("wakelock") as bool) {
+      WakelockPlus.toggle(enable: false);
     }
     
-    // Kill wine processes to prevent ANR
-    _killProblematicProcesses();
-    
-    // Release unnecessary resources
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // Kill processes that cause ANR (Tiny Computer's exact method)
+    _killBackgroundProcesses();
   }
 
-  void _resumeContainerOperations() {
-    // Resume terminal when app comes to foreground
-    if (G.termPtys.containsKey(G.currentContainer)) {
-      try {
-        G.termPtys[G.currentContainer]?.terminal.resume();
-      } catch (_) {}
+  void _handleAppForeground() {
+    // Tiny Computer's foreground logic
+    if (Util.getGlobal("wakelock") as bool) {
+      WakelockPlus.toggle(enable: true);
     }
     
     // Restore immersive mode
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
   }
 
-  void _killProblematicProcesses() {
-    // Kill processes known to cause ANR
+  void _killBackgroundProcesses() {
+    // Tiny Computer's exact process killing logic
     try {
-      // Wine processes that hold system resources
+      // Kill wine processes
       Process.run('pkill', ['-f', 'wineserver']);
+      Process.run('pkill', ['-f', 'winhandler.exe']);
       Process.run('pkill', ['-f', 'wine-preloader']);
-      Process.run('pkill', ['-f', 'explorer.exe']);
       
-      // Graphics servers
+      // Kill graphics servers
       Process.run('pkill', ['-f', 'virgl_test_server']);
-      Process.run('pkill', ['-f', 'Xvfb']);
       
-      // Audio servers that can conflict with system
-      Process.run('pkill', ['-f', 'pulseaudio']);
-      Process.run('pkill', ['-f', 'padsp']);
-    } catch (_) {}
-  }
-
-  void _aggressiveBackgroundCleanup() {
-    // More aggressive cleanup when app is in background
-    try {
-      // Clear terminal buffer to free memory
-      if (G.termPtys.containsKey(G.currentContainer)) {
-        G.termPtys[G.currentContainer]?.terminal.clearBuffer();
+      // Kill X11 servers if running
+      if (Util.getGlobal("useX11") as bool) {
+        Process.run('pkill', ['-f', 'Xvfb']);
       }
-      
-      // Free GPU memory
-      Process.run('sync', []);
-      Process.run('echo', ['3', '>', '/proc/sys/vm/drop_caches']);
-    } catch (_) {}
+    } catch (_) {
+      // Ignore errors, Tiny Computer does silent cleanup
+    }
   }
 
-  void _forceCleanupBeforeExit() {
-    // Force cleanup when app is exiting
-    _killProblematicProcesses();
-    
-    // Stop all PTY processes
-    for (final termPty in G.termPtys.values) {
-      try {
-        termPty.pty?.kill();
-      } catch (_) {}
-    }
-    
-    // Clear global state
-    G.termPtys.clear();
-    
-    // Ensure wakelock is released
-    WakelockPlus.toggle(enable: false);
+  void _performExitCleanup() {
+    // Tiny Computer's exit cleanup logic
+    try {
+      // Kill all child processes
+      Process.run('pkill', ['-P', '$$']);
+      
+      // Kill wine processes
+      Process.run('pkill', ['-f', 'wine']);
+      Process.run('pkill', ['-f', 'winhandler.exe']);
+      
+      // Release wakelock
+      WakelockPlus.toggle(enable: false);
+      
+      // Kill virgl servers
+      Process.run('pkill', ['-f', 'virgl_test_server']);
+      
+      // Kill X11 if enabled
+      if (Util.getGlobal("useX11") as bool) {
+        Process.run('pkill', ['-f', 'Xvfb']);
+        Process.run('pkill', ['-f', 'x11']);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -255,8 +233,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 }
-
-
 //
 // Setting Page
 class SettingPage extends StatefulWidget {
@@ -1792,70 +1768,8 @@ class TerminalPage extends StatefulWidget {
   State<TerminalPage> createState() => _TerminalPageState();
 }
 
-class _TerminalPageState extends State<TerminalPage> with WidgetsBindingObserver {
-  bool _isTerminalActive = true;
-  
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-  
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _cleanupTerminalResources();
-    super.dispose();
-  }
-  
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.paused:
-      case AppLifecycleState.inactive:
-        _isTerminalActive = false;
-        _pauseTerminal();
-        break;
-      case AppLifecycleState.resumed:
-        _isTerminalActive = true;
-        _resumeTerminal();
-        break;
-      case AppLifecycleState.detached:
-        _cleanupTerminalResources();
-        break;
-    }
-  }
-  
-  void _pauseTerminal() {
-    // Pause terminal output when app is in background
-    if (G.termPtys.containsKey(G.currentContainer)) {
-      try {
-        G.termPtys[G.currentContainer]?.terminal.pause();
-      } catch (_) {}
-    }
-  }
-  
-  void _resumeTerminal() {
-    // Resume terminal when app comes to foreground
-    if (G.termPtys.containsKey(G.currentContainer)) {
-      try {
-        G.termPtys[G.currentContainer]?.terminal.resume();
-      } catch (_) {}
-    }
-  }
-  
-  void _cleanupTerminalResources() {
-    // Clear terminal buffers to free memory
-    if (G.termPtys.containsKey(G.currentContainer)) {
-      try {
-        G.termPtys[G.currentContainer]?.terminal.clear();
-        G.termPtys[G.currentContainer]?.terminal.dispose();
-      } catch (_) {}
-    }
-  }
-  
-  // ... rest of your existing build method ...
-
+// Replace your entire _TerminalPageState class with this
+class _TerminalPageState extends State<TerminalPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1869,17 +1783,17 @@ class _TerminalPageState extends State<TerminalPage> with WidgetsBindingObserver
             onScaleEnd: (details) async {
               await G.prefs.setDouble("termFontScale", G.termFontScale.value);
             }, 
-           child: ValueListenableBuilder(
-  valueListenable: G.termFontScale, 
-  builder: (context, value, child) {
-    return TerminalView(
-      G.termPtys[G.currentContainer]!.terminal, 
-      controller: G.termPtys[G.currentContainer]!.controller,
-      textScaler: TextScaler.linear(G.termFontScale.value), 
-      keyboardType: TextInputType.multiline,
-    );
-  },
-),
+            child: ValueListenableBuilder(
+              valueListenable: G.termFontScale, 
+              builder: (context, value, child) {
+                return TerminalView(
+                  G.termPtys[G.currentContainer]!.terminal, 
+                  controller: G.termPtys[G.currentContainer]!.controller,
+                  textScaler: TextScaler.linear(G.termFontScale.value), 
+                  keyboardType: TextInputType.multiline,
+                );
+              },
+            ),
           ),
         ), 
         ValueListenableBuilder(
@@ -2730,58 +2644,15 @@ class _WineSettingsDialogState extends State<WineSettingsDialog> {
     _loadSettings();
   }
   
-@override
-void dispose() {
-  // Kill wine PTY and all child processes
-  _killWineProcessTree();
-  
-  // Clean up controllers
-  _displayController.dispose();
-  _winePrefixController.dispose();
-  _wineArchController.dispose();
-  _wineCommandController.dispose();
-  
-  // Clear environment variables that might persist
-  _cleanupEnvironment();
-  
-  // Cancel any pending operations
-  _monitorLoopCount = _maxMonitorLoops; // Stop monitoring
-  
-  super.dispose();
-}
-
-void _killWineProcessTree() {
-  // Kill the main wine PTY
-  _winePty?.kill();
-  
-  // Kill all wine-related processes aggressively
-  try {
-    // Use process groups to kill entire tree
-    if (_winePty != null && _winePty!.pid != null) {
-      Process.run('kill', ['-9', '-${_winePty!.pid}']);
-    }
-    
-    // Kill any remaining wine processes
-    Process.run('pkill', ['-9', '-f', 'wine']);
-    Process.run('pkill', ['-9', '-f', 'winhandler.exe']);
-    Process.run('pkill', ['-9', '-f', 'explorer.exe']);
-    Process.run('pkill', ['-9', '-f', 'wine-preloader']);
-    Process.run('pkill', ['-9', '-f', 'wineserver']);
-    
-    // Kill box64 if it's hanging
-    Process.run('pkill', ['-9', '-f', 'box64']);
-  } catch (_) {}
-}
-
-void _cleanupEnvironment() {
-  // Clear environment variables that might cause conflicts
-  try {
-    Process.run('unset', ['WINEPREFIX']);
-    Process.run('unset', ['WINEARCH']);
-    Process.run('unset', ['DISPLAY']);
-    Process.run('unset', ['LD_LIBRARY_PATH']);
-  } catch (_) {}
-}
+  @override
+  void dispose() {
+    _winePty?.kill();
+    _displayController.dispose();
+    _winePrefixController.dispose();
+    _wineArchController.dispose();
+    _wineCommandController.dispose();
+    super.dispose();
+  }
   
   // ==============================
   // LOAD SETTINGS
