@@ -978,10 +978,7 @@ class TermPty{
 
 void dispose() {
     pty?.kill();
-    pty = null;
-    // terminal.dispose(); // REMOVE THIS LINE if it exists
-    controller?.dispose();
-    controller = null;
+    
   }
 void kill() {
     pty.kill();
