@@ -4665,7 +4665,7 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => const EnvironmentDialog(),
+                        builder: (context) => EnvironmentDialog(),
                       );
                     },
                   ),
@@ -4675,7 +4675,7 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => const GpuDriversDialog(),
+                        builder: (context) => GpuDriversDialog(),
                       );
                     },
                   ),
@@ -4685,7 +4685,7 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => const DxvkDialog(),
+                        builder: (context) => DxvkDialog(),
                       );
                     },
                   ),
@@ -4695,7 +4695,7 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""");
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => const WineSettingsDialog(),
+                        builder: (context) => WineSettingsDialog(),
                       );
                     },
                   ),
