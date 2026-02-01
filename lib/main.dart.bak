@@ -15,7 +15,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:xterm/xterm.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:clipboard/clipboard.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'backup_restore_dialog.dart';
