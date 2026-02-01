@@ -7,7 +7,6 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 import 'package:retry/retry.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -35,12 +34,10 @@ class Util {
   static Future<void> copyAsset(String src, String dst) async {
     await File(dst).writeAsBytes((await rootBundle.load(src)).buffer.asUint8List());
   }
-  
   static Future<void> copyAsset2(String src, String dst) async {
     ByteData data = await rootBundle.load(src);
     await File(dst).writeAsBytes(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
-  
   static void createDirFromString(String dir) {
     Directory.fromRawPath(const Utf8Encoder().convert(dir)).createSync(recursive: true);
   }
@@ -104,10 +101,6 @@ class Util {
       case "getifaddrsBridge" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
       case "uos" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
       case "virgl" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
-      case "venus" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
-      case "defaultVenusCommand" : return b ? G.prefs.getString(key)! : (value){G.prefs.setString(key, value); return value;}("--no-virgl --venus --socket-path=\$CONTAINER_DIR/tmp/.virgl_test");
-      case "defaultVenusOpt" : return b ? G.prefs.getString(key)! : (value){G.prefs.setString(key, value); return value;}(" VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/virtio_icd.json VN_DEBUG=vtest ");
-      case "androidVenus" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(true);
       case "turnip" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
       case "dri3" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
       case "wakelock" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(false);
@@ -123,7 +116,6 @@ class Util {
       case "defaultTurnipOpt" : return b ? G.prefs.getString(key)! : (value){G.prefs.setString(key, value); return value;}("MESA_LOADER_DRIVER_OVERRIDE=zink VK_ICD_FILENAMES=/home/tiny/.local/share/tiny/extra/freedreno_icd.aarch64.json TU_DEBUG=noconform");
       case "defaultHidpiOpt" : return b ? G.prefs.getString(key)! : (value){G.prefs.setString(key, value); return value;}("GDK_SCALE=2 QT_FONT_DPI=192");
       case "containersInfo" : return G.prefs.getStringList(key)!;
-      case "logcatEnabled" : return b ? G.prefs.getBool(key)! : (value){G.prefs.setBool(key, value); return value;}(true);
     }
   }
 
@@ -148,8 +140,6 @@ class Util {
       case "vncUrl" : return (value){addCurrentProp(key, value); return value;}("http://localhost:36082/vnc.html?host=localhost&port=36082&autoconnect=true&resize=remote&password=12345678");
       case "vncUri" : return (value){addCurrentProp(key, value); return value;}("vnc://127.0.0.1:5904?VncPassword=12345678&SecurityType=2");
       case "commands" : return (value){addCurrentProp(key, value); return value;}(jsonDecode(jsonEncode(D.commands)));
-      case "groupedCommands" : return (value){addCurrentProp(key, value); return value;}(jsonDecode(jsonEncode(LanguageManager.getGroupedCommandsForLanguage(Localizations.localeOf(G.homePageStateContext).languageCode))));
-      case "groupedWineCommands" : return (value){addCurrentProp(key, value); return value;}(jsonDecode(jsonEncode(LanguageManager.getGroupedWineCommandsForLanguage(Localizations.localeOf(G.homePageStateContext).languageCode))));
     }
   }
 
@@ -231,15 +221,6 @@ class Util {
     }
   }
 
-  // Helper methods for grouped commands
-  static Map<String, dynamic> getGroupedCommands() {
-    return getCurrentProp("groupedCommands");
-  }
-
-  static Map<String, dynamic> getGroupedWineCommands() {
-    return getCurrentProp("groupedWineCommands");
-  }
-
 }
 
 //来自xterms关于操作ctrl, shift, alt键的示例
@@ -303,10 +284,8 @@ class VirtualKeyboard extends TerminalInputHandler with ChangeNotifier {
 class TermPty {
   late final Terminal terminal;
   late final Pty pty;
-  late final TerminalController controller;
 
   TermPty() {
-    controller = TerminalController();
     terminal = Terminal(inputHandler: G.keyboard, maxLines: Util.getGlobal("termMaxLines") as int);
     pty = Pty.start(
       "/system/bin/sh",
@@ -373,7 +352,7 @@ class D {
     {"name":"安装科学计算软件Octave", "command":"sudo apt update && sudo apt install -y octave"},
     {"name":"卸载Octave", "command":"sudo apt autoremove --purge -y octave"},
     {"name":"安装WPS", "command":r"""cat << 'EOF' | sh && sudo dpkg --configure -a && sudo apt update && sudo apt install -y /tmp/wps.deb
-wget https://github.akams.cn/https://github.com/tiny-computer/third-party-archives/releases/download/archives/wps-office_11.1.0.11720_arm64.deb -O /tmp/wps.deb
+wget https://github.akams.cn/https://github.com/xodos/third-party-archives/releases/download/archives/wps-office_11.1.0.11720_arm64.deb -O /tmp/wps.deb
 EOF
 rm /tmp/wps.deb"""},
     {"name":"卸载WPS", "command":"sudo apt autoremove --purge -y wps-office"},
@@ -405,7 +384,7 @@ rm /tmp/wps.deb"""},
     {"name":"Install LibreOffice", "command":"sudo apt update && sudo apt install -y libreoffice"},
     {"name":"Uninstall LibreOffice", "command":"sudo apt autoremove --purge -y libreoffice"},
     {"name":"Install WPS", "command":r"""cat << 'EOF' | sh && sudo dpkg --configure -a && sudo apt update && sudo apt install -y /tmp/wps.deb
-wget https://github.com/tiny-computer/third-party-archives/releases/download/archives/wps-office_11.1.0.11720_arm64.deb -O /tmp/wps.deb
+wget https://github.com/xodos/third-party-archives/releases/download/archives/wps-office_11.1.0.11720_arm64.deb -O /tmp/wps.deb
 EOF
 rm /tmp/wps.deb"""},
     {"name":"Uninstall WPS", "command":"sudo apt autoremove --purge -y wps-office"},
@@ -517,8 +496,6 @@ WINEDLLOVERRIDES="d3d8=b,d3d9=b,d3d10core=b,d3d11=b,dxgi=b" wine reg add 'HKEY_C
 
 // Global variables
 class G {
-  static VoidCallback? onExtractionComplete;
-  
   static late final String dataPath;
   static Pty? audioPty;
   static late WebViewController controller;
@@ -574,7 +551,8 @@ class Workflow {
     "assets/assets.zip",
     "${G.dataPath}/assets.zip",
     );
-   
+    //patch.tar.gz存放了tiny文件夹
+    //里面是一些补丁，会被挂载到~/.local/share/tiny
     await Util.copyAsset(
     "assets/patch.tar.gz",
     "${G.dataPath}/patch.tar.gz",
@@ -662,18 +640,12 @@ ${Localizations.localeOf(G.homePageStateContext).languageCode == 'zh' ? "" : "ec
     //Termux:X11的启动命令并不在这里面，而是写死了。这下成💩山代码了:P
     await G.prefs.setStringList("containersInfo", ["""{
 "name":"Debian Bookworm",
-"boot":"${LanguageManager.getBootCommandForLanguage(Localizations.localeOf(G.homePageStateContext).languageCode)}",
+"boot":"${Localizations.localeOf(G.homePageStateContext).languageCode == 'zh' ? D.boot : D.boot.replaceFirst('LANG=zh_CN.UTF-8', 'LANG=en_US.UTF-8').replaceFirst('公共', 'Public').replaceFirst('图片', 'Pictures').replaceFirst('音乐', 'Music').replaceFirst('视频', 'Videos').replaceFirst('下载', 'Downloads').replaceFirst('文档', 'Documents').replaceFirst('照片', 'Photos')}",
 "vnc":"startnovnc &",
 "vncUrl":"http://localhost:36082/vnc.html?host=localhost&port=36082&autoconnect=true&resize=remote&password=12345678",
-"commands":${jsonEncode(LanguageManager.getCommandsForLanguage(Localizations.localeOf(G.homePageStateContext).languageCode))},
-"groupedCommands":${jsonEncode(LanguageManager.getGroupedCommandsForLanguage(Localizations.localeOf(G.homePageStateContext).languageCode))},
-"groupedWineCommands":${jsonEncode(LanguageManager.getGroupedWineCommandsForLanguage(Localizations.localeOf(G.homePageStateContext).languageCode))}
+"commands":${jsonEncode(Localizations.localeOf(G.homePageStateContext).languageCode == 'zh' ? D.commands : D.commands4En)}
 }"""]);
     G.updateText.value = AppLocalizations.of(G.homePageStateContext)!.installationComplete;
-    
-    if (G.onExtractionComplete != null) {
-      G.onExtractionComplete!();
-    }
   }
 
   static Future<void> initData() async {
@@ -697,8 +669,7 @@ ${Localizations.localeOf(G.homePageStateContext).languageCode == 'zh' ? "" : "ec
       final String h = (min(s.width, s.height) * 0.75).round().toString();
       G.postCommand = """sed -i -E "s@(geometry)=.*@\\1=${w}x${h}@" /etc/tigervnc/vncserver-config-tmoe
 sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""";
-      final languageCode = Localizations.localeOf(G.homePageStateContext).languageCode;
-      if (languageCode != 'zh') {
+      if (Localizations.localeOf(G.homePageStateContext).languageCode != 'zh') {
         G.postCommand += "\nlocaledef -c -i en_US -f UTF-8 en_US.UTF-8";
         // For English users, assume they need to enable terminal write
         await G.prefs.setBool("isTerminalWriteEnabled", true);
@@ -736,30 +707,8 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\1=${w}x${h}@" \$(command -v startvnc)""";
   static Future<void> initTerminalForCurrent() async {
     if (!G.termPtys.containsKey(G.currentContainer)) {
       G.termPtys[G.currentContainer] = TermPty();
-      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      final versionName = packageInfo.version;
-      final versionCode = packageInfo.buildNumber;
-      
-      // Write environment variables at the very beginning
-      String envCommands = """
-export DATA_DIR=${G.dataPath}
-export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$LD_LIBRARY_PATH
-export PATH=\$DATA_DIR/bin:\$PATH
-export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
-export TERMUX_APP__VERSION_NAME=$versionName
-export TERMUX_APP__VERSION_CODE=$versionCode
-export TERMUX_VERSION=$versionName
-export TERMUX_APP__PACKAGE_NAME=com.cateners.xodos
-export HOME=\$DATA_DIR
-export TMPDIR=\$DATA_DIR/tmp
-mkdir -p \$TMPDIR
-""";
-      
-      // Write the commands to the terminal
-      G.termPtys[G.currentContainer]!.pty.write(const Utf8Encoder().convert(envCommands));
     }
   }
-
 
   static Future<void> setupAudio() async {
     G.audioPty?.kill();
@@ -770,20 +719,14 @@ mkdir -p \$TMPDIR
 export DATA_DIR=${G.dataPath}
 export PATH=\$DATA_DIR/bin:\$PATH
 export LD_LIBRARY_PATH=\$DATA_DIR/lib
-export PREFIX=\$DATA_DIR/usr
-export HOME=\$DATA_DIR/home
-export TMPDIR=\$DATA_DIR/usr/tmp
-mkdir -p \$HOME
-mkdir -p \$TMPDIR
-export PATH=\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib
 \$DATA_DIR/bin/busybox sed "s/4713/${Util.getGlobal("defaultAudioPort") as int}/g" \$DATA_DIR/bin/pulseaudio.conf > \$DATA_DIR/bin/pulseaudio.conf.tmp
-rm -rf \$TMPDIR/*
-TMPDIR=\$TMPDIR HOME=\$DATA_DIR/home XDG_CONFIG_HOME=\$TMPDIR LD_LIBRARY_PATH=\$DATA_DIR/bin:\$LD_LIBRARY_PATH \$DATA_DIR/bin/pulseaudio --daemonize=no --exit-idle-time=-1 -F \$DATA_DIR/bin/pulseaudio.conf.tmp
-
+rm -rf \$DATA_DIR/pulseaudio_tmp/*
+TMPDIR=\$DATA_DIR/pulseaudio_tmp HOME=\$DATA_DIR/pulseaudio_tmp XDG_CONFIG_HOME=\$DATA_DIR/pulseaudio_tmp LD_LIBRARY_PATH=\$DATA_DIR/bin:\$LD_LIBRARY_PATH \$DATA_DIR/bin/pulseaudio -F \$DATA_DIR/bin/pulseaudio.conf.tmp
+exit
 """));
   await G.audioPty?.exitCode;
   }
+
   static Future<void> launchCurrentContainer() async {
     String extraMount = ""; //mount options and other proot options
     String extraOpt = "";
@@ -807,34 +750,10 @@ export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 ${G.dataPath}/bin/virgl_test_server ${Util.getGlobal("defaultVirglCommand")}""");
       extraOpt += "${Util.getGlobal("defaultVirglOpt")} ";
     }
-    if (Util.getGlobal("venus")) {
-      // Venus hardware acceleration
-      String venusCommand = Util.getGlobal("defaultVenusCommand") as String;
-      String venusOpt = Util.getGlobal("defaultVenusOpt") as String;
-      bool androidVenusEnabled = Util.getGlobal("androidVenus") as bool;
-      String androidVenusEnv = androidVenusEnabled ? "ANDROID_VENUS=1 " : "";
-      
-      Util.execute("""
-export DATA_DIR=${G.dataPath}
-export PATH=\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib
-export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
-
-# Start Venus server
-$androidVenusEnv ${G.dataPath}/bin/virgl_test_server $venusCommand &
-""");
-      
-      extraOpt += "$venusOpt ";
-      if (!(Util.getGlobal("dri3"))) {
-        extraOpt += "MESA_VK_WSI_DEBUG=sw ";
-        extraOpt += "MESA_VK_WSI_PRESENT_MODE=mailbox ";
-      }
-    }
     if (Util.getGlobal("turnip")) {
       extraOpt += "${Util.getGlobal("defaultTurnipOpt")} ";
       if (!(Util.getGlobal("dri3"))) {
         extraOpt += "MESA_VK_WSI_DEBUG=sw ";
-        extraOpt += "MESA_VK_WSI_PRESENT_MODE=mailbox ";
       }
     }
     if (Util.getGlobal("isJpEnabled")) {
@@ -850,7 +769,7 @@ export LD_LIBRARY_PATH=\$DATA_DIR/lib
 export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 export EXTRA_MOUNT="$extraMount"
 export EXTRA_OPT="$extraOpt"
-#export PROOT_L2S_DIR=\$CONTAINER_DIR/.l2s
+#export PROOT_L2S_DIR=\$DATA_DIR/containers/0/.l2s
 cd \$DATA_DIR
 export PROOT_TMP_DIR=\$DATA_DIR/proot_tmp
 export PROOT_LOADER=\$DATA_DIR/applib/libproot-loader.so
@@ -917,20 +836,9 @@ clear""");
   static Future<void> workflow() async {
     grantPermissions();
     await initData();
-    
-    // Start logcat if enabled
-    if (Util.getGlobal("logcatEnabled") as bool) {
-      LogcatManager().startCapture();
-    }
-    
     await initTerminalForCurrent();
     setupAudio();
-    
-    // Send graphics server command to terminal BEFORE container starts
-    await startGraphicsServerInTerminal();
-    
     launchCurrentContainer();
-    
     if (Util.getGlobal("autoLaunchVnc") as bool) {
       if (G.wasX11Enabled) {
         await Util.waitForXServer();
@@ -942,773 +850,6 @@ clear""");
       waitForConnection().then((value) => G.wasAvncEnabled?launchAvnc():launchBrowser());
     }
   }
-
-  // NEW METHOD: Send graphics server command to terminal
-  static Future<void> startGraphicsServerInTerminal() async {
-    bool virglEnabled = Util.getGlobal("virgl") as bool;
-    bool venusEnabled = Util.getGlobal("venus") as bool;
-    
-    if (Util.getGlobal("getifaddrsBridge")) {
-      Util.termWrite("""
-export DATA_DIR=${G.dataPath}
-export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
-pkill -f getifaddrs_* 2>/dev/null || true
-rm -f "\$CONTAINER_DIR/tmp/.getifaddrs-bridge" 2>/dev/null || true
-\$DATA_DIR/bin/getifaddrs_bridge_server "\$CONTAINER_DIR/tmp/.getifaddrs-bridge" &
-echo "getifaddrs bridge enabled"
-""");
-    }
-    
-    if (venusEnabled) {
-      String venusCommand = Util.getGlobal("defaultVenusCommand") as String;
-      bool androidVenusEnabled = Util.getGlobal("androidVenus") as bool;
-      String androidVenusEnv = androidVenusEnabled ? "ANDROID_VENUS=1 " : "";
-      
-      Util.termWrite("""
-export DATA_DIR=${G.dataPath}
-export PATH=\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib
-export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
-
-pkill -f 'virgl_*'  2>/dev/null || true
-rm -f \${CONTAINER_DIR}/tmp/.virgl_test 2>/dev/null || true
-$androidVenusEnv virgl_test_server $venusCommand > \${CONTAINER_DIR}/venus.log 2>&1 &
-export MESA_VK_WSI_PRESENT_MODE=mailbox
-export VN_DEBUG=vtest
-echo "Venus server started in background"
-""");
-      
-    } else if (virglEnabled) {
-      Util.termWrite("""
-export DATA_DIR=${G.dataPath}
-export PATH=\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib
-export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
-
-pkill -f 'virgl_*' 2>/dev/null || true
-rm -f \${CONTAINER_DIR}/tmp/.virgl_test 2>/dev/null || true
-
-virgl_test_server ${Util.getGlobal("defaultVirglCommand")} > \${CONTAINER_DIR}/virgl.log 2>&1 &
-
-echo "Virgl server started in background"
-""");
-    }
-  }
 }
 
-// Modern color scheme with dark purple theme
-class AppColors {
-  static const Color primaryPurple = Color(0xFFBB86FC);
-  static const Color primaryDark = Color(0xFF121212);
-  static const Color surfaceDark = Color(0xFF1E1E1E);
-  static const Color cardDark = Color(0xFF252525);
-  static const Color accentPurple = Color(0xFF9C27B0);
-  static const Color textPrimary = Color(0xFFE1E1E1);
-  static const Color textSecondary = Color(0xFFA0A0A0);
-  static const Color divider = Color(0xFF333333);
-  static const Color hoverColor = Color(0xFF2D2D2D);
-  static const Color pressedColor = Color(0xFF3A3A3A);
-}
 
-class LanguageManager {
-  static const Map<String, Map<String, String>> _languageConfigs = {
-    'en': {
-      'lang': 'en_US.UTF-8',
-      'public': 'Public',
-      'pictures': 'Pictures',
-      'music': 'Music',
-      'videos': 'Videos',
-      'downloads': 'Downloads',
-      'documents': 'Documents',
-      'photos': 'Photos',
-    },
-    'zh': {
-      'lang': 'zh_CN.UTF-8',
-      'public': '公共',
-      'pictures': '图片',
-      'music': '音乐',
-      'videos': '视频',
-      'downloads': '下载',
-      'documents': '文档',
-      'photos': '照片',
-    },
-    'ja': {
-      'lang': 'ja_JP.UTF-8',
-      'public': '公開',
-      'pictures': '画像',
-      'music': '音楽',
-      'videos': 'ビデオ',
-      'downloads': 'ダウンロード',
-      'documents': '書類',
-      'photos': '写真',
-    },
-    'ar': {
-      'lang': 'ar_SA.UTF-8',
-      'public': 'عام',
-      'pictures': 'الصور',
-      'music': 'الموسيقى',
-      'videos': 'الفيديو',
-      'downloads': 'التنزيلات',
-      'documents': 'المستندات',
-      'photos': 'الصور',
-    },
-    'hi': {
-      'lang': 'hi_IN.UTF-8',
-      'public': 'सार्वजनिक',
-      'pictures': 'चित्र',
-      'music': 'संगीत',
-      'videos': 'वीडियो',
-      'downloads': 'डाउनलोड',
-      'documents': 'दस्तावेज़',
-      'photos': 'तस्वीरें',
-    },
-    'es': {
-      'lang': 'es_ES.UTF-8',
-      'public': 'Público',
-      'pictures': 'Imágenes',
-      'music': 'Música',
-      'videos': 'Vídeos',
-      'downloads': 'Descargas',
-      'documents': 'Documentos',
-      'photos': 'Fotos',
-    },
-    'pt': {
-      'lang': 'pt_BR.UTF-8',
-      'public': 'Público',
-      'pictures': 'Imagens',
-      'music': 'Música',
-      'videos': 'Vídeos',
-      'downloads': 'Downloads',
-      'documents': 'Documentos',
-      'photos': 'Fotos',
-    },
-    'fr': {
-      'lang': 'fr_FR.UTF-8',
-      'public': 'Public',
-      'pictures': 'Images',
-      'music': 'Musique',
-      'videos': 'Vidéos',
-      'downloads': 'Téléchargements',
-      'documents': 'Documents',
-      'photos': 'Photos',
-    },
-    'ru': {
-      'lang': 'ru_RU.UTF-8',
-      'public': 'Общедоступные',
-      'pictures': 'Изображения',
-      'music': 'Музыка',
-      'videos': 'Видео',
-      'downloads': 'Загрузки',
-      'documents': 'Документы',
-      'photos': 'Фотографии',
-    },
-  };
-
-  static String getBootCommandForLanguage(String languageCode) {
-    final config = _languageConfigs[languageCode] ?? _languageConfigs['zh']!;
-    
-    String baseBoot = D.boot;
-    
-    // Replace the LANG environment variable
-    baseBoot = baseBoot.replaceFirst('LANG=zh_CN.UTF-8', 'LANG=${config['lang']}');
-    
-    // Replace folder names
-    baseBoot = baseBoot.replaceFirst('公共', config['public']!);
-    baseBoot = baseBoot.replaceFirst('图片', config['pictures']!);
-    baseBoot = baseBoot.replaceFirst('音乐', config['music']!);
-    baseBoot = baseBoot.replaceFirst('视频', config['videos']!);
-    baseBoot = baseBoot.replaceFirst('下载', config['downloads']!);
-    baseBoot = baseBoot.replaceFirst('文档', config['documents']!);
-    baseBoot = baseBoot.replaceFirst('照片', config['photos']!);
-    
-    return baseBoot;
-  }
-
-  static List<Map<String, String>> getCommandsForLanguage(String languageCode) {
-    switch (languageCode) {
-      case 'zh':
-        return D.commands;
-      case 'ja':
-        return _japaneseCommands;
-      case 'ar':
-        return _arabicCommands;
-      case 'hi':
-        return _hindiCommands;
-      case 'es':
-        return _spanishCommands;
-      case 'pt':
-        return _portugueseCommands;
-      case 'fr':
-        return _frenchCommands;
-      case 'ru':
-        return _russianCommands;
-      default:
-        return D.commands4En;
-    }
-  }
-
-  static List<Map<String, String>> getWineCommandsForLanguage(String languageCode) {
-    switch (languageCode) {
-      case 'zh':
-        return D.wineCommands;
-      case 'ja':
-        return _japaneseWineCommands;
-      case 'ar':
-        return _arabicWineCommands;
-      case 'hi':
-        return _hindiWineCommands;
-      case 'es':
-        return _spanishWineCommands;
-      case 'pt':
-        return _portugueseWineCommands;
-      case 'fr':
-        return _frenchWineCommands;
-      case 'ru':
-        return _russianWineCommands;
-      default:
-        return D.wineCommands4En;
-    }
-  }
-
-  static Map<String, dynamic> getGroupedCommandsForLanguage(String languageCode) {
-    final commands = getCommandsForLanguage(languageCode);
-    
-    // Separate install commands from other commands
-    final installCommands = commands.where((cmd) { 
-      final name = cmd["name"]?.toLowerCase() ?? "";
-      final command = cmd["command"]?.toLowerCase() ?? "";
-      return name.contains("install") || 
-             command.contains("install") || 
-             name.contains("enable");
-    }).toList();
-    
-    final otherCommands = commands.where((cmd) {
-      final name = cmd["name"]?.toLowerCase() ?? "";
-      final command = cmd["command"]?.toLowerCase() ?? "";
-      return !name.contains("install") && 
-             !command.contains("install") && 
-             !name.contains("enable") &&
-             name != "???" &&
-             !name.contains("shutdown");
-    }).toList();
-    
-    final systemCommands = commands.where((cmd) {
-      final name = cmd["name"]?.toLowerCase() ?? "";
-      return name.contains("shutdown") || name == "???";
-    }).toList();
-    
-    return {
-      "install": installCommands,
-      "other": otherCommands,
-      "system": systemCommands,
-    };
-  }
-
-  static Map<String, dynamic> getGroupedWineCommandsForLanguage(String languageCode) {
-    final commands = getWineCommandsForLanguage(languageCode);
-    
-    // Separate Wine install/remove commands from configuration commands
-    final installCommands = commands.where((cmd) {
-      final name = cmd["name"]?.toLowerCase() ?? "";
-      return name.contains("remove wine") || 
-             name.contains("remove");
-    }).toList();
-    
-    final configCommands = commands.where((cmd) {
-      final name = cmd["name"]?.toLowerCase() ?? "";
-      return !name.contains("remove wine") && 
-             !name.contains("remove");
-    }).toList();
-    
-    return {
-      "install": installCommands,
-      "config": configCommands,
-    };
-  }
-
-  // Japanese commands
-  static const List<Map<String, String>> _japaneseCommands = [
-    {"name":"パッケージの更新とアップグレード", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"システム情報を表示", "command":"neofetch -L && neofetch --off"},
-    {"name":"画面をクリア", "command":"clear"},
-    {"name":"タスクを中断", "command":"\x03"},
-    {"name":"グラフィックソフトKritaをインストール", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"Kritaをアンインストール", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"動画編集ソフトKdenliveをインストール", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"Kdenliveをアンインストール", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"LibreOfficeをインストール", "command":"sudo apt update && sudo apt install -y libreoffice"},
-    {"name":"LibreOfficeをアンインストール", "command":"sudo apt autoremove --purge -y libreoffice"},
-    {"name":"WPSをインストール", "command":r"""cat << 'EOF' | sh && sudo dpkg --configure -a && sudo apt update && sudo apt install -y /tmp/wps.deb
-wget https://github.akams.cn/https://github.com/tiny-computer/third-party-archives/releases/download/archives/wps-office_11.1.0.11720_arm64.deb -O /tmp/wps.deb
-EOF
-rm /tmp/wps.deb"""},
-    {"name":"WPSをアンインストール", "command":"sudo apt autoremove --purge -y wps-office"},
-    {"name":"ごみ箱を有効にする", "command":"sudo apt update && sudo apt install -y gvfs && echo 'インストール完了、アプリを再起動してごみ箱を使用してください。'"},
-    {"name":"パッケージキャッシュをクリーン", "command":"sudo apt clean"},
-    {"name":"シャットダウン", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // Arabic commands
-  static const List<Map<String, String>> _arabicCommands = [
-    {"name":"تحديث الحزم والترقية", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"معلومات النظام", "command":"neofetch -L && neofetch --off"},
-    {"name":"مسح الشاشة", "command":"clear"},
-    {"name":"مقاطعة المهمة", "command":"\x03"},
-    {"name":"تثبيت برنامج الرسم كريتا", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"إزالة كریتا", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"تثبيت برنامج تحرير الفيديو كدينلايف", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"إزالة كدينلايف", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"تثبيت ليبر أوفيس", "command":"sudo apt update && sudo apt install -y libreoffice"},
-    {"name":"إزالة ليبر أوفيس", "command":"sudo apt autoremove --purge -y libreoffice"},
-    {"name":"تفعيل سلة المهملات", "command":"sudo apt update && sudo apt install -y gvfs && echo 'تم التثبيت، أعد تشغيل التطبيق لاستخدام سلة المهملات。'"},
-    {"name":"تنظيف ذاكرة التخزين المؤقت", "command":"sudo apt clean"},
-    {"name":"إيقاف التشغيل", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // Hindi commands
-  static const List<Map<String, String>> _hindiCommands = [
-    {"name":"पैकेज अपडेट और अपग्रेड", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"सिस्टम जानकारी", "command":"neofetch -L && neofetch --off"},
-    {"name":"स्क्रीन साफ करें", "command":"clear"},
-    {"name":"कार्य बाधित करें", "command":"\x03"},
-    {"name":"ग्राफिक सॉफ्टवेयर क्रिता इंस्टॉल करें", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"क्रिता अनइंस्टॉल करें", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"वीडियो एडिटिंग सॉफ्टवेयर केडेनलाइव इंस्टॉल करें", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"केडेनलाइव अनइंस्टॉल करें", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"रीसाइकिल बिन सक्षम करें", "command":"sudo apt update && sudo apt install -y gvfs && echo 'इंस्टॉलेशन पूर्ण, रीसाइकिल बिन का उपयोग करने के लिए ऐप को पुनरारंभ करें。'"},
-    {"name":"पैकेज कैश साफ करें", "command":"sudo apt clean"},
-    {"name":"शटडाउन", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // Spanish commands
-  static const List<Map<String, String>> _spanishCommands = [
-    {"name":"Actualizar y mejorar paquetes", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"Información del sistema", "command":"neofetch -L && neofetch --off"},
-    {"name":"Limpiar pantalla", "command":"clear"},
-    {"name":"Interrumpir tarea", "command":"\x03"},
-    {"name":"Instalar software gráfico Krita", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"Desinstalar Krita", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"Instalar editor de video Kdenlive", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"Desinstalar Kdenlive", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"Habilitar papelera de reciclaje", "command":"sudo apt update && sudo apt install -y gvfs && echo 'Instalación completa, reinicie la aplicación para usar la papelera de reciclaje。'"},
-    {"name":"Limpiar caché de paquetes", "command":"sudo apt clean"},
-    {"name":"Apagar", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // Portuguese commands
-  static const List<Map<String, String>> _portugueseCommands = [
-    {"name":"Atualizar y mejorar pacotes", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"Informações do sistema", "command":"neofetch -L && neofetch --off"},
-    {"name":"Limpar tela", "command":"clear"},
-    {"name":"Interromper tarefa", "command":"\x03"},
-    {"name":"Instalar software gráfico Krita", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"Desinstalar Krita", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"Instalar editor de vídeo Kdenlive", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"Desinstalar Kdenlive", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"Habilitar lixeira", "command":"sudo apt update && sudo apt install -y gvfs && echo 'Instalação completa, reinicie o aplicativo para usar a lixeira。'"},
-    {"name":"Limpar cache de pacotes", "command":"sudo apt clean"},
-    {"name":"Desligar", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // French commands
-  static const List<Map<String, String>> _frenchCommands = [
-    {"name":"Mettre à jour et améliorer les paquets", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"Informations système", "command":"neofetch -L && neofetch --off"},
-    {"name":"Effacer l'écran", "command":"clear"},
-    {"name":"Interromper la tâche", "command":"\x03"},
-    {"name":"Installer le logiciel graphique Krita", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"Désinstaller Krita", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"Installer l'éditeur vidéo Kdenlive", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"Désinstaller Kdenlive", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"Activer la corbeille", "command":"sudo apt update && sudo apt install -y gvfs && echo 'Installation terminée, redémarrez l'application para usar la corbeille。'"},
-    {"name":"Nettoyer le cache des paquets", "command":"sudo apt clean"},
-    {"name":"Éteindre", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // Russian commands
-  static const List<Map<String, String>> _russianCommands = [
-    {"name":"Обновить и улучшить пакеты", "command":"sudo dpkg --configure -a && sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y"},
-    {"name":"Информация о системе", "command":"neofetch -L && neofetch --off"},
-    {"name":"Очистить экран", "command":"clear"},
-    {"name":"Прервать задачу", "command":"\x03"},
-    {"name":"Установить графическое ПО Krita", "command":"sudo apt update && sudo apt install -y krita krita-l10n"},
-    {"name":"Удалить Krita", "command":"sudo apt autoremove --purge -y krita krita-l10n"},
-    {"name":"Установить видеоредактор Kdenlive", "command":"sudo apt update && sudo apt install -y kdenlive"},
-    {"name":"Удалить Kdenlive", "command":"sudo apt autoremove --purge -y kdenlive"},
-    {"name":"Включить корзину", "command":"sudo apt update && sudo apt install -y gvfs && echo 'Установка завершена, перезапустите приложение для использования корзины。'"},
-    {"name":"Очистить кэш пакетов", "command":"sudo apt clean"},
-    {"name":"Выключить", "command":"stopvnc\nexit\nexit"},
-    {"name":"???", "command":"timeout 8 cmatrix"}
-  ];
-
-  // Wine commands for different languages (simplified versions)
-  static const List<Map<String, String>> _japaneseWineCommands = [
-    {"name":"Wine設定", "command":"winecfg"},
-    {"name":"文字化け修正", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"スタートメニューフォルダ", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-
-  static const List<Map<String, String>> _arabicWineCommands = [
-    {"name":"إعدادات Wine", "command":"winecfg"},
-    {"name":"إصلاح الأحرف", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"مجلد قائمة ابدأ", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-
-  static const List<Map<String, String>> _hindiWineCommands = [
-    {"name":"Wine सेटिंग्स", "command":"winecfg"},
-    {"name":"वर्ण सुधार", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"स्टार्ट मेनू फोल्डर", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-
-  static const List<Map<String, String>> _spanishWineCommands = [
-    {"name":"Configuración de Wine", "command":"winecfg"},
-    {"name":"Reparar caracteres", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"Carpeta del menú Inicio", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-
-  static const List<Map<String, String>> _portugueseWineCommands = [
-    {"name":"Configurações do Wine", "command":"winecfg"},
-    {"name":"Reparar caracteres", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"Pasta do menu Iniciar", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-
-  static const List<Map<String, String>> _frenchWineCommands = [
-    {"name":"Paramètres Wine", "command":"winecfg"},
-    {"name":"Réparer les caractères", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"Dossier du menu Démarrer", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-
-  static const List<Map<String, String>> _russianWineCommands = [
-    {"name":"Настройки Wine", "command":"winecfg"},
-    {"name":"Исправить символы", "command":"regedit Z:\\\\home\\\\tiny\\\\.local\\\\share\\\\tiny\\\\extra\\\\chn_fonts.reg && wine reg delete \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes\" /va /f"},
-    {"name":"Папка меню Пуск", "command":"wine explorer \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\""},
-  ];
-}
-
-// Android 10+ Modern Settings Button Styles
-class AppButtonStyles {
-  // Modern Android 10+ Settings Button Style (for command buttons)
-  static final ButtonStyle modernSettingsButton = TextButton.styleFrom(
-    backgroundColor: Colors.transparent,
-    foregroundColor: AppColors.textPrimary,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    alignment: Alignment.centerLeft,
-    textStyle: const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-    ),
-    minimumSize: const Size(double.infinity, 56),
-    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  ).copyWith(
-    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          return AppColors.pressedColor;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return AppColors.hoverColor;
-        }
-        return null;
-      },
-    ),
-    side: MaterialStateProperty.all<BorderSide>(
-      const BorderSide(color: AppColors.divider, width: 0.5),
-    ),
-  );
-
-  // Compact Settings Button Style (for smaller buttons)
-  static final ButtonStyle compactSettingsButton = TextButton.styleFrom(
-    backgroundColor: Colors.transparent,
-    foregroundColor: AppColors.textPrimary,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    ),
-    alignment: Alignment.centerLeft,
-    textStyle: const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-    ),
-    minimumSize: const Size(double.infinity, 48),
-    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  ).copyWith(
-    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          return AppColors.pressedColor;
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return AppColors.hoverColor;
-        }
-        return null;
-      },
-    ),
-    side: MaterialStateProperty.all<BorderSide>(
-      const BorderSide(color: AppColors.divider, width: 0.5),
-    ),
-  );
-
-  // Primary Action Button (for important actions)
-  static final ButtonStyle primaryActionButton = ElevatedButton.styleFrom(
-    backgroundColor: AppColors.primaryPurple,
-    foregroundColor: Colors.white,
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    elevation: 2,
-    shadowColor: Colors.black.withOpacity(0.2),
-    textStyle: const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    minimumSize: const Size(double.infinity, 56),
-  );
-
-  // Danger Action Button (for destructive actions)
-  static final ButtonStyle dangerActionButton = ElevatedButton.styleFrom(
-    backgroundColor: Colors.red.withOpacity(0.1),
-    foregroundColor: Colors.red,
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    elevation: 0,
-    textStyle: const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    minimumSize: const Size(double.infinity, 56),
-  ).copyWith(
-    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
-        return Colors.red.withOpacity(0.2);
-      },
-    ),
-    side: MaterialStateProperty.all<BorderSide>(
-      BorderSide(color: Colors.red.withOpacity(0.3), width: 1),
-    ),
-  );
-}
-
-class LogcatManager {
-  static final LogcatManager _instance = LogcatManager._internal();
-  factory LogcatManager() => _instance;
-  LogcatManager._internal();
-
-  Process? _logcatProcess;
-  bool _isRunning = false;
-  
-  bool get isRunning => _isRunning;
-
-  // Get external storage directory
-  Future<Directory> getLogDirectory() async {
-    try {
-      // First try external storage (phone storage)
-      final externalDir = await getExternalStorageDirectory();
-      if (externalDir != null) {
-        final logDir = Directory('${externalDir.path}/logs');
-        if (!await logDir.exists()) {
-          await logDir.create(recursive: true);
-        }
-        return logDir;
-      }
-    } catch (e) {
-      print("Failed to get external storage: $e");
-    }
-    
-    // Fallback to internal storage if external fails
-    final appDocDir = await getApplicationDocumentsDirectory();
-    final logDir = Directory('${appDocDir.path}/logs');
-    if (!await logDir.exists()) {
-      await logDir.create(recursive: true);
-    }
-    return logDir;
-  }
-
-  // Get the readable path for display
-  Future<String> getLogPath() async {
-    final dir = await getLogDirectory();
-    return dir.path;
-  }
-
-  // Start logcat capture
-  Future<void> startCapture() async {
-    if (_isRunning) {
-      print("Logcat already running");
-      return;
-    }
-
-    try {
-      print("Starting logcat capture...");
-      
-      // Clear logcat buffer
-      await _clearLogcatBuffer();
-      
-      // Get directory
-      final logDir = await getLogDirectory();
-      
-      // Create log file with timestamp
-      final now = DateTime.now();
-      final timestamp = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}";
-      final logFile = File('${logDir.path}/xodos_$timestamp.log');
-      
-      print("Saving logs to: ${logFile.path}");
-      
-      // Start logcat process
-      _logcatProcess = await Process.start(
-        '/system/bin/logcat', 
-        ['-v', 'time', '*:V'],  // time format, verbose
-        runInShell: true,
-      );
-      
-      _isRunning = true;
-      
-      // Write header to file
-      final sink = logFile.openWrite(mode: FileMode.write);
-      sink.write('=== xodos Logcat Capture ===\n');
-      sink.write('Started: ${now.toIso8601String()}\n');
-      sink.write('Device: ${Platform.localHostname}\n');
-      sink.write('====================================\n\n');
-      await sink.flush();
-      
-      // Listen to stdout and write to file
-      _logcatProcess!.stdout.listen(
-        (data) {
-          sink.add(data);
-        },
-        onDone: () async {
-          await sink.flush();
-          await sink.close();
-          _isRunning = false;
-          print("Logcat capture completed");
-        },
-        onError: (error) {
-          print("Logcat stdout error: $error");
-          sink.write('[ERROR] $error\n');
-        },
-      );
-      
-      // Listen to stderr
-      _logcatProcess!.stderr.listen(
-        (data) {
-          final error = String.fromCharCodes(data);
-          print("Logcat stderr: $error");
-          sink.write('[STDERR] $error\n');
-        },
-      );
-      
-      // Check process health
-      _logcatProcess!.exitCode.then((code) {
-        print("Logcat process exited with code: $code");
-        _isRunning = false;
-      });
-      
-      print("Logcat capture started successfully");
-      
-    } catch (e) {
-      print("Failed to start logcat: $e");
-      _isRunning = false;
-    }
-  }
-
-  // Clear logcat buffer
-  Future<void> _clearLogcatBuffer() async {
-    try {
-      final clearProcess = await Process.run(
-        '/system/bin/logcat', 
-        ['-c'],
-        runInShell: true,
-      );
-      if (clearProcess.exitCode == 0) {
-        print("Logcat buffer cleared");
-      } else {
-        print("Failed to clear logcat buffer: ${clearProcess.stderr}");
-      }
-    } catch (e) {
-      print("Error clearing logcat buffer: $e");
-    }
-  }
-
-  // Stop logcat capture
-  Future<void> stopCapture() async {
-    if (!_isRunning) return;
-    
-    print("Stopping logcat...");
-    _isRunning = false;
-    
-    if (_logcatProcess != null) {
-      _logcatProcess!.kill();
-      await _logcatProcess!.exitCode;
-      _logcatProcess = null;
-    }
-    
-    print("Logcat stopped");
-  }
-
-  // Clear all logs
-  Future<bool> clearLogs() async {
-    try {
-      final logDir = await getLogDirectory();
-      if (await logDir.exists()) {
-        final files = await logDir.list().toList();
-        int deletedCount = 0;
-        for (var file in files) {
-          if (file is File && file.path.endsWith('.log')) {
-            await file.delete();
-            deletedCount++;
-          }
-        }
-        print("Cleared $deletedCount log files from ${logDir.path}");
-        return deletedCount > 0;
-      }
-    } catch (e) {
-      print("Failed to clear logs: $e");
-    }
-    return false;
-  }
-
-  // Get log files
-  Future<List<String>> getLogFiles() async {
-    try {
-      final logDir = await getLogDirectory();
-      if (await logDir.exists()) {
-        final files = await logDir.list().toList();
-        // Sort by modification time (newest first)
-        final fileList = files.whereType<File>().where((f) => f.path.endsWith('.log')).toList();
-        fileList.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
-        return fileList.map((file) => file.path.split('/').last).toList();
-      }
-    } catch (e) {
-      print("Failed to get log files: $e");
-    }
-    return [];
-  }
-
-  // Read log file
-  Future<String?> readLogFile(String filename) async {
-    try {
-      final logDir = await getLogDirectory();
-      final file = File('${logDir.path}/$filename');
-      if (await file.exists()) {
-        return await file.readAsString();
-      }
-    } catch (e) {
-      print("Failed to read log file: $filename, error: $e");
-    }
-    return null;
-  }
-
-  Future<void> dispose() async {
-    await stopCapture();
-  }
-}
