@@ -1,4 +1,4 @@
-// main.dart  --  This file is part of tiny_computer.               
+// main.dart  --  This file is part of xodos.               
                                                                        
 import 'dart:async';
 import 'dart:io';
@@ -19,9 +19,9 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:tiny_computer/l10n/app_localizations.dart';
+import 'package:xodos/l10n/app_localizations.dart';
 
-import 'package:tiny_computer/workflow.dart';
+import 'package:xodos/workflow.dart';
 
 import 'package:avnc_flutter/avnc_flutter.dart';
 import 'package:x11_flutter/x11_flutter.dart';
@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
               colorScheme: darkDynamic,
               useMaterial3: true,
             ),
-            home: const MyHomePage(title: "Tiny Computer"),
+            home: const MyHomePage(title: "XoDos"),
           );
         }
     );
