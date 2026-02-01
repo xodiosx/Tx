@@ -22,7 +22,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:xodos/l10n/app_localizations.dart';
 
 import 'package:xodos/workflow.dart';
-
+// Add these imports
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_clipboard/flutter_clipboard.dart';
+import 'workflow.dart';
 import 'package:avnc_flutter/avnc_flutter.dart';
 import 'package:x11_flutter/x11_flutter.dart';
 
@@ -3902,7 +3905,17 @@ class _FakeLoadingStatusState extends State<FakeLoadingStatus> {
   }
 }
 
+
+
+class SettingPage extends StatefulWidget {
+  const SettingPage({super.key});
+
+  @override
+  State<SettingPage> createState() => _SettingPageState();
+}
+
 class _SettingPageState extends State<SettingPage> {
+
   final List<bool> _expandState = [false, false, false, false, false, false];
   double _avncScaleFactor = Util.getGlobal("avncScaleFactor") as double;
 
