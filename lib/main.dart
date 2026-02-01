@@ -41,63 +41,75 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
-        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          return MaterialApp(
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en'),
-              Locale('es'),
-              Locale('pt'),
-              Locale('ru'),
-              Locale('fr'),
-              Locale('ja'),
-              Locale('hi'),
-              Locale('ar'),
-              Locale.fromSubtags(languageCode: 'zh'), // generic Chinese 'zh'
-              Locale.fromSubtags(
-                languageCode: 'zh',
-                scriptCode: 'Hans',
-              ), // generic simplified Chinese 'zh_Hans'
-              Locale.fromSubtags(
-                languageCode: 'zh',
-                scriptCode: 'Hant',
-              ), // generic traditional Chinese 'zh_Hant'
-              Locale.fromSubtags(
-                languageCode: 'zh',
-                scriptCode: 'Hans',
-                countryCode: 'CN',
-              ), // 'zh_Hans_CN'
-              Locale.fromSubtags(
-                languageCode: 'zh',
-                scriptCode: 'Hant',
-                countryCode: 'TW',
-              ), // 'zh_Hant_TW'
-              Locale.fromSubtags(
-                languageCode: 'zh',
-                scriptCode: 'Hant',
-                countryCode: 'HK',
-              ), // 'zh_Hant_HK'
-            ],
-            theme: ThemeData(
-              colorScheme: lightDynamic,
-              useMaterial3: true,
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        return MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('es'),
+            Locale('pt'),
+            Locale('ru'),
+            Locale('fr'),
+            Locale('ja'),
+            Locale('hi'),
+            Locale('ar'),
+            Locale.fromSubtags(languageCode: 'zh'),
+            Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+            Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+            Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'),
+            Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
+            Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+          ],
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.light,
             ),
-            darkTheme: ThemeData(
-              colorScheme: darkDynamic,
-              useMaterial3: true,
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+              // Customize the dark purple scheme
+              primary: Colors.deepPurple[300],
+              secondary: Colors.purple[300],
+              background: Colors.black, // Black background
+              surface: Colors.grey[900], // Dark grey surface
+              onBackground: Colors.white,
+              onSurface: Colors.white,
             ),
-            home: const MyHomePage(title: "Xodos"),
-          );
-        }
+            useMaterial3: true,
+            // Additional dark theme customization
+            scaffoldBackgroundColor: Colors.black,
+            cardColor: Colors.grey[900],
+            dialogBackgroundColor: Colors.grey[900],
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.grey[900],
+              foregroundColor: Colors.deepPurple[300],
+            ),
+            bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              backgroundColor: Colors.grey[900],
+              selectedItemColor: Colors.deepPurple[300],
+              unselectedItemColor: Colors.grey[500],
+            ),
+            floatingActionButtonTheme: FloatingActionButtonThemeData(
+              backgroundColor: Colors.deepPurple[300],
+              foregroundColor: Colors.white,
+            ),
+          ),
+          themeMode: ThemeMode.dark, // Force dark theme
+          home: const MyHomePage(title: "Xodos"),
+        );
+      },
     );
   }
 }
-
 // RTL Wrapper for language support
 class RTLWrapper extends StatelessWidget {
   final Widget child;
@@ -6175,27 +6187,8 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           },
         ),
-        floatingActionButton: ValueListenableBuilder(
-          valueListenable: G.pageIndex,
-          builder: (context, value, child) {
-            return Visibility(
-              visible: isLoadingComplete && (value == 0),
-              child: FloatingActionButton(
-                tooltip: AppLocalizations.of(context)!.enterGUI,
-                onPressed: () {
-                  if (G.wasX11Enabled) {
-                    Workflow.launchX11();
-                  } else if (G.wasAvncEnabled) {
-                    Workflow.launchAvnc();
-                  } else {
-                    Workflow.launchBrowser();
-                  }
-                },
-                child: const Icon(Icons.play_arrow),
-              ),
-            );
-          },
-        ),
+        //
+        
       ),
     );
   }

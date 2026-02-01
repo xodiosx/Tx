@@ -17,7 +17,8 @@ jobs:
     - name: Prepare SDK folders
       run: |
         
-        ls $HOME
+        ls $HOME/
+     
      
      
     # -------------------------
@@ -31,6 +32,7 @@ jobs:
         key: flutter-sdk-cache-v1
         restore-keys: |
              flutter-sdk-cache-
+
     - name: Download Flutter SDK if not cached
       if: steps.cache-flutter.outputs.cache-hit != 'true'
       run: |
@@ -63,9 +65,7 @@ jobs:
         path: ~/android-sdk
         key: android-sdk-cache-v1
         restore-keys: |
-            android-sdk-cache-
-
-
+             android-sdk-cache-
     # -------------------------
     # Install Android SDK dependencies (no caching)
     # -------------------------
@@ -102,7 +102,7 @@ jobs:
     - name: Cache Flutter packages
       uses: actions/cache@v3
       with:
-        path: $HOME/.pub-cache
+        path: ~/.pub-cache
         key: flutter-packages-${{ hashFiles('pubspec.yaml') }}
 
     # -------------------------
@@ -139,9 +139,6 @@ jobs:
     # -------------------------
     - name: Build release APK
       run: |
-        #rm -rf ./build
-        #flutter clean
-        #flutter pub get         
         flutter build apk --target-platform android-arm64 --split-per-abi
 
     # -------------------------
