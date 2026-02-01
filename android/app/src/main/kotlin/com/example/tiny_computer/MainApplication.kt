@@ -1,12 +1,11 @@
-package com.com.xodos
+package com.example.tiny_computer
 
-import android.app.Application
 import android.content.Context
 import com.google.android.material.color.DynamicColors
+import io.flutter.app.FlutterApplication
 import me.weishu.reflection.Reflection
-import java.io.*
 
-class MainApplication : Application() {
+class MainApplication : FlutterApplication() {
 
     override fun onCreate() {
         super.onCreate()
