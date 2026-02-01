@@ -759,24 +759,6 @@ mkdir -p \$TMPDIR
       G.termPtys[G.currentContainer]!.pty.write(const Utf8Encoder().convert(envCommands));
     }
   }
-/*
-  static Future<void> setupAudio() async {
-    G.audioPty?.kill();
-    G.audioPty = Pty.start(
-      "/system/bin/sh"
-    );
-    G.audioPty!.write(const Utf8Encoder().convert("""
-export DATA_DIR=${G.dataPath}
-export PATH=\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib
-\$DATA_DIR/bin/busybox sed "s/4713/${Util.getGlobal("defaultAudioPort") as int}/g" \$DATA_DIR/bin/pulseaudio.conf > \$DATA_DIR/bin/pulseaudio.conf.tmp
-rm -rf \$DATA_DIR/pulseaudio_tmp/*
-TMPDIR=\$DATA_DIR/pulseaudio_tmp HOME=\$DATA_DIR/pulseaudio_tmp XDG_CONFIG_HOME=\$DATA_DIR/pulseaudio_tmp LD_LIBRARY_PATH=\$DATA_DIR/bin:\$LD_LIBRARY_PATH \$DATA_DIR/bin/pulseaudio -F \$DATA_DIR/bin/pulseaudio.conf.tmp
-exit
-"""));
-  await G.audioPty?.exitCode;
-  }
-*/
 
 
   static Future<void> setupAudio() async {
