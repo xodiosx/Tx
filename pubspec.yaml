@@ -1,4 +1,4 @@
-name: xodos
+name: tiny_computer
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -30,9 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  file_picker: ^8.1.2
   xterm: ^4.0.0
-  audioplayers: ^5.2.0
   flutter_pty: ^0.4.2
   path_provider: ^2.1.5
   webview_flutter: ^4.13.0
@@ -49,13 +47,14 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
-#  xterm:
- #   path: ./xterm
   x11_flutter:
-    path: ./x11_flutter
+    git:
+      url: https://github.com/tiny-computer/x11_flutter.git
+      ref: 3b92b515b1ebc32c93e18e8b3a2983656713e4dd
   avnc_flutter:
-    path: ./avnc_flutter
-
+    git:
+      url: https://github.com/tiny-computer/avnc_flutter.git
+      ref: 4008565259f88fe4613b885979f79e439bc5a420
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
