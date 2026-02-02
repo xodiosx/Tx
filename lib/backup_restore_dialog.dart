@@ -20,7 +20,6 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
   Future<void> _backupSystem() async {
     showDialog(
       context: context,
-      barrierDismissible: false, 
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.confirmBackup),
         content: Text(AppLocalizations.of(context)!.backupConfirmation),
@@ -83,21 +82,10 @@ class _BackupRestoreDialogState extends State<BackupRestoreDialog> {
 
   Future<void> _restoreSystem() async {
     try {
-    setState(() {
-      _isProcessing = true;
-      _statusMessage = 'Preparing please wait...';
-    });
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.any,
         allowMultiple: false,
       );
-
-//  HIDE loading BEFORE showing any confirm dialog
-if (mounted) {
-  setState(() {
-    _isProcessing = false;
-  });
-}
 
       if (result != null && result.files.single.path != null) {
         final filePath = result.files.single.path!;
@@ -129,7 +117,6 @@ if (mounted) {
           // Wine installation
           showDialog(
             context: context,
-            barrierDismissible: false, 
             builder: (context) => AlertDialog(
               title: Text(AppLocalizations.of(context)!.installWine),
               content: Text(AppLocalizations.of(context)!.wineInstallationWarning),
@@ -152,7 +139,6 @@ if (mounted) {
           // System restore
           showDialog(
             context: context,
-            barrierDismissible: false, 
             builder: (context) => AlertDialog(
               title: Text(AppLocalizations.of(context)!.systemRestore),
               content: Text(AppLocalizations.of(context)!.systemRestoreWarning),
@@ -225,9 +211,6 @@ if (mounted) {
       Util.termWrite('echo "Setting executable permissions..."');
       Util.termWrite('chmod +x /opt/wine/bin/* 2>/dev/null || true');
       
-      Util.termWrite('echo "cleaning wine archive..."');
-      Util.termWrite('rm -rf "$escapedPath"');
-      
       Util.termWrite('echo "=== WINE INSTALLATION COMPLETE ==="');
       Util.termWrite('echo "Wine installed to /opt/wine"');
       Util.termWrite('exit');
@@ -288,7 +271,7 @@ if (mounted) {
         Util.termWrite('  tar -xJv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "Restarting terminal..." && exit');
         Util.termWrite('else');
         Util.termWrite('  echo "Using busybox tar command"');
-        Util.termWrite('  /data/data/com.xodos/files/bin/busybox tar -xJv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "cleaning and Restarting terminal..." && rm -rf "$escapedPath" && exit');
+        Util.termWrite('  /data/data/com.xodos/files/bin/busybox tar -xJv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "Restarting terminal..." && exit');
         Util.termWrite('fi');
       } else if (fileName.endsWith('.tar.gz')) {
         Util.termWrite('echo "Checking for tar command..."');
@@ -297,16 +280,16 @@ if (mounted) {
         Util.termWrite('  tar -xzv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "Restarting terminal..." && exit');
         Util.termWrite('else');
         Util.termWrite('  echo "Using busybox tar command"');
-        Util.termWrite('  /data/data/com.xodos/files/bin/busybox tar -xzv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "cleaning and Restarting terminal..." && rm -rf "$escapedPath" && exit');
+        Util.termWrite('  /data/data/com.xodos/files/bin/busybox tar -xzv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "Restarting terminal..." && exit');
         Util.termWrite('fi');
       } else if (fileName.endsWith('.tar')) {
         Util.termWrite('echo "Checking for tar command..."');
         Util.termWrite('if command -v tar >/dev/null 2>&1; then');
         Util.termWrite('  echo "Using system tar command"');
-        Util.termWrite('  tar -xv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "cleaning and Restarting terminal..." && rm -rf "$escapedPath" && exit');
+        Util.termWrite('  tar -xv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "Restarting terminal..." && exit');
         Util.termWrite('else');
         Util.termWrite('  echo "Using busybox tar command"');
-        Util.termWrite('  /data/data/com.xodos/files/bin/busybox tar -xv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "cleaning and Restarting terminal..." && rm -rf "$escapedPath" && exit');
+        Util.termWrite('  /data/data/com.xodos/files/bin/busybox tar -xv --delay-directory-restore --preserve-permissions -f "$escapedPath" -C /data/data/com.xodos/files/containers/0/ && echo "" && echo "=== SYSTEM RESTORE COMPLETE ===" && echo "Restarting terminal..." && exit');
         Util.termWrite('fi');
       } else {
         Util.termWrite('echo "${AppLocalizations.of(context)!.unsupportedFormat}: $fileName"');
