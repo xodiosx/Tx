@@ -3,10 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-
-
-
-
+l
 // extraction_manager.dart
 // extraction_manager.dart
 import 'package:shared_preferences/shared_preferences.dart';

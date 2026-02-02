@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:xodos/l10n/app_localizations.dart';
 import 'package:flutter/services.dart'; // For SystemNavigator
-import 'constants.dart';
-import 'default_values.dart';
-import 'core_classes.dart';
+
+import 'workflow.dart';
 
 class BackupRestoreDialog extends StatefulWidget {
   const BackupRestoreDialog({super.key});
