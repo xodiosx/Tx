@@ -17,7 +17,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:audioplayers/audioplayers.dart';
+//import 'package:audioplayers/audioplayers.dart';
 import 'backup_restore_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -5029,18 +5029,18 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
   final List<bool> _expandState = [false, false, false, false, false];
-  late AudioPlayer _gamesMusicPlayer;
-  bool _isGamesMusicPlaying = false;
+ // late AudioPlayer _gamesMusicPlayer;
+// bool _isGamesMusicPlaying = false;
   
   @override
   void initState() {
     super.initState();
     _expandState[0] = widget.openFirstInfo;
-    _gamesMusicPlayer = AudioPlayer();
-    _setupMusicPlayer();
+ //   _gamesMusicPlayer = AudioPlayer();
+  //  _setupMusicPlayer();
   }
-
-  void _setupMusicPlayer() async {
+  
+/*  void _setupMusicPlayer() async {
     try {
       await _gamesMusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _gamesMusicPlayer.setVolume(0.6);
@@ -5077,12 +5077,12 @@ class _InfoPageState extends State<InfoPage> {
         _isGamesMusicPlaying = false;
       });
     }
-  }
+  } */
 
   @override
   void dispose() {
-    _stopGamesMusic();
-    _gamesMusicPlayer.dispose();
+    //_stopGamesMusic();
+  //  _gamesMusicPlayer.dispose();
     super.dispose();
   }
 
@@ -5092,13 +5092,7 @@ class _InfoPageState extends State<InfoPage> {
       elevation: 1,
       expandedHeaderPadding: const EdgeInsets.all(0),
       expansionCallback: (panelIndex, isExpanded) {
-        if (panelIndex == 1) {
-          if (isExpanded) {
-            _startGamesMusic();
-          } else {
-            _stopGamesMusic();
-          }
-        }
+       
         
         setState(() {
           _expandState[panelIndex] = isExpanded;
@@ -5142,8 +5136,8 @@ class _InfoPageState extends State<InfoPage> {
           headerBuilder: ((context, isExpanded) {
             return ListTile(
               title: Text(AppLocalizations.of(context)!.mindTwisterGames),
-              subtitle: Text(_isGamesMusicPlaying 
-                ? AppLocalizations.of(context)!.extractionInProgress 
+              subtitle: Text( 
+                AppLocalizations.of(context)!.extractionInProgress 
                 : AppLocalizations.of(context)!.playWhileWaiting),
             );
           }), 
@@ -5216,19 +5210,8 @@ class _InfoPageState extends State<InfoPage> {
                   ),
                 ),
                 const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    _isGamesMusicPlaying ? Icons.music_note : Icons.music_off,
-                    color: _isGamesMusicPlaying ? const Color(0xFFBB86FC) : Colors.grey,
-                  ),
-                  onPressed: () {
-                    if (_isGamesMusicPlaying) {
-                      _stopGamesMusic();
-                    } else {
-                      _startGamesMusic();
-                    }
-                  },
-                ),
+
+                
               ],
             ),
           ),
