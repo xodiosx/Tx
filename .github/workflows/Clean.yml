@@ -1,0 +1,37 @@
+name: Clean Git History
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write     # VERY IMPORTANT → allows force push
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history
+
+      - name: Set Git identity
+        run: |
+          git config --global user.email "workflow@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Remove all Git history and create clean commit
+        run: |
+          git checkout --orphan clean-history
+          git add -A
+          git commit -m "Clean: reset repository history"
+
+          # Delete old main branch if exists
+          git branch -D gxde || true
+
+          # Rename new orphan branch to main
+          git branch -m main
+
+          # Force push to overwrite history
+          git push -f origin main

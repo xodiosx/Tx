@@ -1,95 +1,96 @@
-name: Bug Report
-description: Report abnormal software behavior (please read all instructions before submitting)
+name: Bug 报告
+description: 报告软件异常行为（提交前请阅读所有说明文字）
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        **Important Notes:**
-        - First search [all issues](https://github.com/xodiosx/XoDos2/issues?q=is%3Aissue). **Duplicate reports will be closed immediately**
-        - Every requirement in this template has its specific purpose. Please complete all fields
+        **必读须知：**
+        - 请先搜索[所有issue](https://github.com/Cateners/tiny_computer/issues?q=is%3Aissue)，**相同问题重复提交会被直接关闭**
+        - 请先自查[常见使用问题](https://gitee.com/caten/tc-hints/blob/master/pool/faq.md)，是否能解决你的问题
+        - 本模板中的每项要求都有其特定原因，请完整填写
 
   - type: input
     id: device
     attributes:
-      label: "Device Model"
+      label: "设备型号"
       description: |
-        **Why is this needed?**  
-        Many bugs are device-specific, such as:
-        - Samsung OneUI 7 incompatible with v1.0.23 and below (issue #303)
-        - HarmonyOS 4 missing wireless debugging option
-      placeholder: "Brand + specific model"
+        **为什么需要这个信息？**  
+        许多Bug与设备强相关，例如：
+        - 三星OneUI 7无法使用v1.0.23及以下版本（issue #303）
+        - 鸿蒙4缺少无线调试选项
+      placeholder: "品牌+具体型号"
     validations:
       required: true
 
   - type: input
     id: os-version
     attributes:
-      label: "Operating System Version"
+      label: "操作系统版本"
       description: |
-        **Why is this needed?**  
-        Compatibility varies across Android versions
-      placeholder: "Full OS name + version number"
+        **为什么需要这个信息？**  
+        Android各版本存在兼容性差异
+      placeholder: "完整系统名称+版本号"
     validations:
       required: true
 
   - type: input
     id: app-version
     attributes:
-      label: "XoDos Version"
+      label: "小小电脑版本"
       description: |
-        **Why is this needed?**  
-        1. Old version issues may have been fixed in newer releases (always use the latest version)  
-        2. Different desktop environments (XFCE/LXQT/GXDE) may behave differently  
-        **If not using the latest version, be prepared for your issue to be ignored**
-      placeholder: "Version number + desktop environment (e.g., v1.0.23 GXDE)"
+        **为什么需要这个信息？**  
+        1. 旧版问题可能已在新版修复（请始终使用最新版）  
+        2. 不同桌面环境（XFCE/LXQT/GXDE）行为可能不同  
+        **如果不是最新版，请做好问题被忽略的准备**
+      placeholder: "版本号+桌面环境（如：v1.0.23 GXDE）"
     validations:
       required: true
 
   - type: dropdown
     id: is-latest
     attributes:
-      label: "Is this the latest version?"
+      label: "是否最新版？"
       options:
-        - "Yes"
-        - "No"
+        - "是"
+        - "否"
     validations:
       required: true
 
   - type: textarea
     id: why-not-latest
     attributes:
-      label: "If not latest version, explanation is mandatory"
-      placeholder: "Explain in detail..."
+      label: "若非最新版，必须说明原因"
+      placeholder: "详细解释原因..."
 
   - type: textarea
     id: steps
     attributes:
-      label: "Steps to reproduce the issue"
+      label: "出现问题的重现步骤"
       description: |
-        **Why detailed steps?**  
-        Linux offers extreme flexibility where any operation may affect results, such as:  
-        - Did you run with sudo?  
-        - Modified environment variables?  
-        - Installed third-party dependencies?
-      placeholder: "Maybe start from launching the application..."
+        **为什么需要详细步骤？**  
+        Linux的自由度极高，任何操作都可能影响结果，例如：  
+        - 是否通过sudo运行？  
+        - 是否修改过环境变量？  
+        - 是否安装过第三方依赖？
+      placeholder: "也许可以从启动软件开始逐步描述..."
     validations:
       required: true
 
   - type: textarea
     id: logs
     attributes:
-      label: "Provide terminal screenshots or other relevant information"
+      label: "提供终端截图或其他相关信息"
       description: |
-        **Why is this needed?**  
-        Text descriptions might omit critical details
-      placeholder: "Paste log text or drag images here..."
+        **为什么需要这些？**  
+        文字描述可能遗漏关键信息
+      placeholder: "粘贴日志文本或拖入图片..."
     validations:
       required: true
 
   - type: markdown
     attributes:
       value: |
-        **Issue Priority Explanation:**  
-        This software's primary purpose is running PC-level applications like WPS, CAJ Viewer, and Edraw Max. Issues related to these applications will receive priority. Other issues will be handled case-by-case (limited by time and capabilities...). Unresolved issues will remain open for community visibility - maybe someone has a better solution!
+        **问题优先级说明：**  
+        本软件的初衷是安装PC级软件如WPS、CAJ Viewer、亿图图示。和这些软件相关的问题会得到重视。如果是其他问题得视情况（受限于精力和能力...），没能修复的issue会保留以让更多人看到，也许网友会有更好的解决办法！
