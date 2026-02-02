@@ -5136,9 +5136,7 @@ class _InfoPageState extends State<InfoPage> {
           headerBuilder: ((context, isExpanded) {
             return ListTile(
               title: Text(AppLocalizations.of(context)!.mindTwisterGames),
-              subtitle: Text( 
-                AppLocalizations.of(context)!.extractionInProgress 
-                : AppLocalizations.of(context)!.playWhileWaiting),
+              subtitle: Text(AppLocalizations.of(context)!.extractionInProgress),
             );
           }), 
           body: _buildGamesSection(),
