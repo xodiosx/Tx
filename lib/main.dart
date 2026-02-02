@@ -1,4 +1,4 @@
-// main.dart  --  This file is part of tiny_computer.               
+// main.dart  --  This file is part of xodos.               
                                                                        
 import 'dart:async';
 import 'dart:math';
@@ -15,9 +15,9 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:xterm/xterm.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:tiny_computer/l10n/app_localizations.dart';
+import 'package:xodos/l10n/app_localizations.dart';
 
-import 'package:tiny_computer/workflow.dart';
+import 'package:xodos/workflow.dart';
 
 import 'package:avnc_flutter/avnc_flutter.dart';
 import 'package:x11_flutter/x11_flutter.dart';
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
               colorScheme: darkDynamic,
               useMaterial3: true,
             ),
-            home: MyHomePage(title: "Tiny Computer"),
+            home: MyHomePage(title: "xodos"),
           );
         }
     );
@@ -1044,7 +1044,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           Padding(padding: EdgeInsets.all(8), child: Text(AppLocalizations.of(context)!.recommendApp)),
           ElevatedButton(
             onPressed: () {
-              launchUrl(Uri.parse("https://github.com/Cateners/tiny_computer"), mode: LaunchMode.externalApplication);
+              launchUrl(Uri.parse("https://github.com/Cateners/xodos"), mode: LaunchMode.externalApplication);
             },
             child: Text(AppLocalizations.of(context)!.projectUrl),
           ),
