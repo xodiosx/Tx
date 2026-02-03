@@ -199,7 +199,7 @@ class Util {
     return null;
   }
 
-  static Future<bool> isXServerReady(String host, int port, {int timeoutSeconds = 5}) async {
+  static Future<bool> isXServerReady(String host, int port, {int timeoutSeconds = 3}) async {
     try {
       final socket = await Socket.connect(host, port, timeout: Duration(seconds: timeoutSeconds));
       await socket.close();

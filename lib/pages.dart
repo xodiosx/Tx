@@ -1813,7 +1813,7 @@ class _TerminalPageState extends State<TerminalPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(' session stopped. closing app...'),
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 2),
       ),
     );
     SystemNavigator.pop();
@@ -1835,14 +1835,14 @@ Future<void> _copyTerminalText() async {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Selected text copied to clipboard'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 1),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('No text selected'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 1),
           ),
         );
       }
@@ -1850,7 +1850,7 @@ Future<void> _copyTerminalText() async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No text selected - please select text by long-pressing and dragging'),
-          duration: Duration(seconds: 2),
+          duration: Duration(seconds: 1),
         ),
       );
     }
@@ -1859,7 +1859,7 @@ Future<void> _copyTerminalText() async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Failed to copy selected text'),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 1),
       ),
     );
   }
@@ -1878,7 +1878,7 @@ Future<void> _pasteToTerminal() async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Clipboard is empty'),
-          duration: Duration(seconds: 2),
+          duration: Duration(seconds: 1),
         ),
       );
     }
@@ -1886,7 +1886,7 @@ Future<void> _pasteToTerminal() async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Failed to paste from clipboard'),
-        duration: Duration(seconds: 2),
+        duration: Duration(seconds: 1),
       ),
     );
   }

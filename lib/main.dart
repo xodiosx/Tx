@@ -363,7 +363,7 @@ class _ExtractionProgressCircleState extends State<ExtractionProgressCircle> {
         
         // Hide circle when complete
         if (complete && _showCircle) {
-          Future.delayed(const Duration(seconds: 2), () {
+          Future.delayed(const Duration(milliseconds: 200), () {
             if (mounted) {
               setState(() {
                 _showCircle = false;
