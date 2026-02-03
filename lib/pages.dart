@@ -25,7 +25,7 @@ import 'dialogs.dart';
 import 'debug.dart';
 //import 'app_colors.dart'; // Add this
 
-import 'package:tiny_computer/l10n/app_localizations.dart';
+import 'package:xodos/l10n/app_localizations.dart';
 
 // Add the missing MyHomePage class at the TOP of the file:
 class MyHomePage extends StatefulWidget {
