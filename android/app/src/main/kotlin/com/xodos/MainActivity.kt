@@ -1,4 +1,4 @@
-package com.com.xodos
+package com.xodos
 
 import android.util.Log
 import android.content.Intent

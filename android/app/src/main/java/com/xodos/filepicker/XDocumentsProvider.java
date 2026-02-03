@@ -1,4 +1,4 @@
-package com.com.xodos.filepicker;
+package com.xodos.filepicker;
 
 import static android.provider.DocumentsContract.Document.MIME_TYPE_DIR;
 import static android.system.OsConstants.S_IFLNK;
