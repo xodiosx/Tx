@@ -40,16 +40,17 @@
             android:name=".Signal9Activity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-        <provider
-            android:name="com.xodos.filepicker.TinyDocumentsProvider"
-            android:authorities="com.xodos.documents"
-            android:exported="true"
-            android:grantUriPermissions="true"
-            android:permission="android.permission.MANAGE_DOCUMENTS">
-            <intent-filter>
-                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
-            </intent-filter>
-        </provider>
+ <provider
+android:name="bin.mt.file.content.MTDataFilesProvider"
+android:permission="android.permission.MANAGE_DOCUMENTS"
+android:exported="true"
+android:authorities="com.xodos.MTDataFilesProvider"
+android:grantUriPermissions="true">
+<intent-filter>
+<action
+android:name="android.content.action.DOCUMENTS_PROVIDER"/>
+</intent-filter>
+</provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
