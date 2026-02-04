@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:xodos/l10n/app_localizations.dart';
+import 'package:xodos2/l10n/app_localizations.dart';
 import 'package:flutter/services.dart'; // For SystemNavigator
 import 'constants.dart';
 import 'default_values.dart';

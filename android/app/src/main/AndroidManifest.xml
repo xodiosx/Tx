@@ -41,8 +41,8 @@
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <provider
-            android:name="com.xodos.filepicker.TinyDocumentsProvider"
-            android:authorities="com.xodos.documents"
+            android:name="com.xodos2.filepicker.TinyDocumentsProvider"
+            android:authorities="com.xodos2.documents"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS">
