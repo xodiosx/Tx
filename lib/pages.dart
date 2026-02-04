@@ -25,7 +25,7 @@ import 'dialogs.dart';
 import 'debug.dart';
 //import 'app_colors.dart'; // Add this
 
-import 'package:xodos2/l10n/app_localizations.dart';
+import 'package:xodos/l10n/app_localizations.dart';
 
 // Add the missing MyHomePage class at the TOP of the file:
 class MyHomePage extends StatefulWidget {
@@ -3717,7 +3717,7 @@ echo "\\n=== Test Complete ==="
                           labelText: 'Wine Prefix',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.folder),
-                          hintText: '/data/data/com.xodos2/files/home/.wine',
+                          hintText: '/data/data/com.xodos/files/home/.wine',
                         ),
                       ),
                       const SizedBox(height: 8),

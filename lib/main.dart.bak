@@ -24,7 +24,7 @@ import 'core_classes.dart';
 import 'spirited_mini_games.dart';
 import 'pages.dart';  // ← ADD THIS IMPORT
 import 'dialogs.dart'; // ← ADD THIS IMPORT
-import 'package:xodos/l10n/app_localizations.dart';
+import 'package:xodos2/l10n/app_localizations.dart';
 import 'backup_restore_dialog.dart';
 
 void main() {
