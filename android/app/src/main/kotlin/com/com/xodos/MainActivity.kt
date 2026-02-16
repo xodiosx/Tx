@@ -1,24 +1,21 @@
-package com.xodos
+package com.com.xodos
 
-import android.system.Os.setenv
-
+import android.util.Log
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.NonNull
-import androidx.annotation.Keep
-import androidx.appcompat.app.AppCompatDelegate
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-
 
 class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "android").setMethodCallHandler {
-            // 注册通道并设置方法调用处理器
+            // 
             call, result ->
-            // 判断方法名
+            // 
             when (call.method) {
                 "launchSignal9Page" -> {
                     startActivity(Intent(this, Signal9Activity::class.java))
@@ -28,7 +25,7 @@ class MainActivity: FlutterActivity() {
                     result.success(getApplicationInfo().nativeLibraryDir)
                 }
                 else -> {
-                    // 不支持的方法名
+                    // 
                     result.notImplemented()
                 }
             }

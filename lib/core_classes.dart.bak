@@ -25,7 +25,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-import 'package:tiny_computer/l10n/app_localizations.dart';
+import 'package:xodos/l10n/app_localizations.dart';
 
 import 'package:avnc_flutter/avnc_flutter.dart';
 import 'package:x11_flutter/x11_flutter.dart';
@@ -144,7 +144,9 @@ class Util {
       }
   }
 
-  static dynamic getCurrentProp(String key) {
+
+
+ static dynamic getCurrentProp(String key) {
     dynamic m = jsonDecode(Util.getGlobal("containersInfo")[G.currentContainer]);
     if (m.containsKey(key)) {
       return m[key];
@@ -199,7 +201,7 @@ class Util {
     return null;
   }
 
-  static Future<bool> isXServerReady(String host, int port, {int timeoutSeconds = 3}) async {
+  static Future<bool> isXServerReady(String host, int port, {int timeoutSeconds = 5}) async {
     try {
       final socket = await Socket.connect(host, port, timeout: Duration(seconds: timeoutSeconds));
       await socket.close();
@@ -598,7 +600,7 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\\\1=${w}x${h}@" \$(command -v startvnc)
         await G.prefs.setBool("isStickyKey", false);
         await G.prefs.setBool("wakelock", true);
       }
-      await G.prefs.setBool("getifaddrsBridge", (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 31);
+    //  await G.prefs.setBool("getifaddrsBridge", (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 31);
     }
     G.currentContainer = Util.getGlobal("defaultContainer") as int;
 
@@ -1064,3 +1066,4 @@ echo "Virgl server started in background"
   
   
 }
+

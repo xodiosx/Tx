@@ -2,14 +2,18 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:remove="maxSdkVersion"/>
+    
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
+android:requestLegacyExternalStorage="true"
         android:label="@string/tc_app_name"
         android:name=".MainApplication"
+        android:appCategory="game"
+        android:isGame="true"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
         android:launchMode="singleInstance"
@@ -40,7 +44,7 @@
             android:name=".Signal9Activity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
- <provider
+        <provider
 android:name="bin.mt.file.content.MTDataFilesProvider"
 android:permission="android.permission.MANAGE_DOCUMENTS"
 android:exported="true"
@@ -51,6 +55,8 @@ android:grantUriPermissions="true">
 android:name="android.content.action.DOCUMENTS_PROVIDER"/>
 </intent-filter>
 </provider>
+
+       
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

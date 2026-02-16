@@ -144,7 +144,9 @@ class Util {
       }
   }
 
-  static dynamic getCurrentProp(String key) {
+
+
+ static dynamic getCurrentProp(String key) {
     dynamic m = jsonDecode(Util.getGlobal("containersInfo")[G.currentContainer]);
     if (m.containsKey(key)) {
       return m[key];
@@ -199,7 +201,7 @@ class Util {
     return null;
   }
 
-  static Future<bool> isXServerReady(String host, int port, {int timeoutSeconds = 3}) async {
+  static Future<bool> isXServerReady(String host, int port, {int timeoutSeconds = 5}) async {
     try {
       final socket = await Socket.connect(host, port, timeout: Duration(seconds: timeoutSeconds));
       await socket.close();
@@ -598,7 +600,7 @@ sed -i -E "s@^(VNC_RESOLUTION)=.*@\\\\1=${w}x${h}@" \$(command -v startvnc)
         await G.prefs.setBool("isStickyKey", false);
         await G.prefs.setBool("wakelock", true);
       }
-      await G.prefs.setBool("getifaddrsBridge", (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 31);
+    //  await G.prefs.setBool("getifaddrsBridge", (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 31);
     }
     G.currentContainer = Util.getGlobal("defaultContainer") as int;
 
@@ -682,7 +684,7 @@ prefixsh="/data/data/com.xodos/files/usr/bin"
     export ANDROID_RUNTIME_ROOT=/apex/com.android.runtime
     export TERMUX_APP__PACKAGE_MANAGER=apt
     export DEX2OATBOOTCLASSPATH=/apex/com.android.runtime/javalib/core-oj.jar:/apex/com.android.runtime/javalib/core-libart.jar:/apex/com.android.runtime/javalib/okhttp.jar:/apex/com.android.runtime/javalib/bouncycastle.jar:/apex/com.android.runtime/javalib/apache-xml.jar:/system/framework/framework.jar:/system/framework/ext.jar:/system/framework/telephony-common.jar:/system/framework/voip-common.jar:/system/framework/ims-common.jar:/system/framework/knoxsdk.jar:/system/framework/knoxanalyticssdk.jar:/system/framework/smartbondingservice.jar:/system/framework/securetimersdk.jar:/system/framework/fipstimakeystore.jar:/system/framework/timakeystore.jar:/system/framework/sec_sdp_sdk.jar:/system/framework/sec_sdp_hidden_sdk.jar:/system/framework/drutils.jar:/system/framework/android.test.base.jar:/system/framework/ucmopensslenginehelper.jar:/system/framework/esecomm.jar:/system/framework/tcmiface.jar:/system/framework/QPerformance.jar:/system/framework/UxPerformance.jar
-    export TMPDIR=/data/data/com.xodos/files/usr/tmp
+  #  export TMPDIR=/data/data/com.xodos/files/usr/tmp
     export ANDROID_DATA=/data
     export TERMUX_APP__AM_SOCKET_SERVER_ENABLED=true
     export SHELL_CMD__SHELL_ID=0    
@@ -702,7 +704,7 @@ prefixsh="/data/data/com.xodos/files/usr/bin"
     export ANDROID_TZDATA_ROOT=/apex/com.android.tzdata
     export SHELL_CMD__PACKAGE_NAME=com.xodos
     #export XCURSOR_THEME=gaming
-    export PATH=/data/data/com.xodos/files/usr/bin:\$PATH
+#    export PATH=/data/data/com.xodos/files/usr/bin:\$PATH
     export ANDROID_ASSETS=/system/app
     export _=/data/data/com.xodos/files/usr/bin/env
 #export XDG_DATA_DIRS=\$PREFIX/usr/share
@@ -712,8 +714,8 @@ prefixsh="/data/data/com.xodos/files/usr/bin"
 #export XDG_CACHE_HOME=\$HOME/.cache
 unset VK_ICD_FILENAMES
 ln -sf \$DATA_DIR/containers/0/tmp \$DATA_DIR/usr/
-exec \$DATA_DIR/usr/bin/bash --login   
-export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib:\$DATA_DIR/usr/libexec/:\$LD_LIBRARY_PATH
+#exec \$DATA_DIR/usr/bin/bash --login   
+export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib:\$LD_LIBRARY_PATH
 unset PATH
 export PATH=\$DATA_DIR/usr/bin:\$DATA_DIR/bin:\$PATH
 unset LD_LIBRARY_PATH
@@ -723,6 +725,7 @@ exec \$DATA_DIR/usr/bin/bash --login
 fi
      fi
 cd
+unset LD_LIBRARY_PATH
 """;
     
     // Write the commands to the terminal
@@ -786,7 +789,7 @@ if (Util.getGlobal("virgl")) {
 export DATA_DIR=${G.dataPath}
 
 export PATH=\$DATA_DIR/usr/bin:\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib
+#export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib
 export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 #${G.dataPath}/usr/bin/virgl_test_server ${Util.getGlobal("defaultVirglCommand")} &
 """);
@@ -810,7 +813,7 @@ export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
   Util.execute("""
 export DATA_DIR=${G.dataPath}
 export PATH=\$DATA_DIR/usr/bin:\$DATA_DIR/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib:/system/lib64
+#export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib:/system/lib64
 export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 
 #$fullCommand
@@ -827,7 +830,7 @@ export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 if (Util.getGlobal("turnip")) {
  Util.termWrite("""
 #. /data/data/com.xodos/files/usr/opt/drv
-export MESA_VK_WSI_PRESENT_MODE=mailbox
+echo "turnip driver"
 """);
   extraOpt += "${Util.getGlobal("defaultTurnipOpt")} ";
   if (!(Util.getGlobal("dri3"))) {
@@ -847,7 +850,7 @@ export MESA_VK_WSI_PRESENT_MODE=mailbox
 """
 export DATA_DIR=${G.dataPath}
 export PATH=\$DATA_DIR/bin:\$DATA_DIR/usr/bin:\$PATH
-export LD_LIBRARY_PATH=\$DATA_DIR/lib:\$DATA_DIR/usr/lib
+export LD_LIBRARY_PATH=\$DATA_DIR/lib
 export CONTAINER_DIR=\$DATA_DIR/containers/${G.currentContainer}
 export EXTRA_MOUNT="$extraMount"
 export EXTRA_OPT="$extraOpt"
@@ -1064,3 +1067,4 @@ echo "Virgl server started in background"
   
   
 }
+

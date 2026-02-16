@@ -1,4 +1,4 @@
-package com.xodos
+package com.com.xodos
 
 import android.content.Intent
 import android.net.Uri
@@ -7,7 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.xodos.databinding.ActivitySignal9Binding
+import com.com.xodos.databinding.ActivitySignal9Binding
 
 class Signal9Activity : AppCompatActivity() {
 
@@ -18,7 +18,7 @@ class Signal9Activity : AppCompatActivity() {
         binding = ActivitySignal9Binding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // 设置状态栏和导航栏颜色匹配蓝屏背景
+        // 
         window.statusBarColor = ContextCompat.getColor(this, R.color.tc_s9a_blue_screen_blue)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.tc_s9a_blue_screen_blue)
         
@@ -26,12 +26,12 @@ class Signal9Activity : AppCompatActivity() {
     }
 
     private fun setupContent() {
-        // 设置错误信息
+        // 
         binding.errorDetails.text = getString(R.string.tc_s9a_error_message)
         
-        // 根据Android版本显示不同的解决方案
+        // android 14-
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Android 14以下版本
+            // Android 14+
             binding.preAndroid14Layout.isVisible = true
             binding.solutionIntro.text = getString(R.string.tc_s9a_solution_intro)
             binding.solutionAlternative.text = getString(R.string.tc_s9a_solution_alternative)
@@ -39,11 +39,11 @@ class Signal9Activity : AppCompatActivity() {
             binding.tutorialButton.text = getString(R.string.tc_s9a_tutorial_button)
 
             binding.toolButton.setOnClickListener {
-                openBrowserLink("https://www.vmos.cn/zhushou.htm")
+                openBrowserLink("https://github.com/xodiosx/XoDos2/blob/main/phantom.md")
             }
 
             binding.tutorialButton.setOnClickListener {
-                openBrowserLink("https://gitee.com/caten/tc-hints/blob/master/pool/signal9fix.md")
+                openBrowserLink("https://github.com/xodiosx/XoDos2/blob/main/signal9fix.md")
             }
         } else {
             // Android 14及以上版本

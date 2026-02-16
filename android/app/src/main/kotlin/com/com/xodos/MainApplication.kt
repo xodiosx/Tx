@@ -1,11 +1,12 @@
-package com.xodos
+package com.com.xodos
 
+import android.app.Application
 import android.content.Context
 import com.google.android.material.color.DynamicColors
-import io.flutter.app.FlutterApplication
 import me.weishu.reflection.Reflection
+import java.io.*
 
-class MainApplication : FlutterApplication() {
+class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
